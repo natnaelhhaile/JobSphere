@@ -1,4 +1,5 @@
 # JobSphere
+<img width="250" alt="logo" src="https://github.com/user-attachments/assets/9bbfff45-43d4-403e-b29e-4b2fee509312">
 
 JobSphere is a web application that helps users find job opportunities based on their resumes. It uses a combination of resume parsing, job scraping from multiple platforms, and MongoDB to store user data and job listings. The application allows users to upload their resumes, extract relevant skills and experience, and automatically generate job recommendations based on their profile.
 
