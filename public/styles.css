@@ -1,0 +1,142 @@
+/* General body styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+}
+
+/* Header styling */
+header {
+    background-color: #333;
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+}
+
+.logo img {
+    width: 100px;  /* Adjust size as necessary */
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+.profile-icon img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 20px;
+}
+
+.signout-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.signout-btn:hover {
+    background-color: #c0392b;
+}
+
+/* Footer styling */
+footer {
+    background-color: #333;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+}
+
+.footer-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.social-icons {
+    margin-bottom: 10px;
+}
+
+.social-icon {
+    width: 40px;
+    height: 40px;
+    margin: 0 10px;
+    filter: grayscale(100%);
+    transition: all 0.3s ease;
+}
+
+.social-icon:hover {
+    filter: grayscale(0%);
+}
+
+/* Copyright text styling */
+.copyright {
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+/* Dashboard Styling */
+.job-card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    padding: 20px;
+    transition: transform 0.2s;
+}
+
+.job-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.job-logo {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    border-radius: 5px;
+}
+
+.job-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.job-location,
+.job-salary,
+.job-type {
+    font-size: 1rem;
+    margin-top: 10px;
+}
+
+.job-type span {
+    font-weight: bold;
+    color: #28a745;
+}
+
+.remote-status {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.btn-info {
+    background-color: #17a2b8;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+}

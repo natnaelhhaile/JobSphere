@@ -1,0 +1,30 @@
+<!-- footer.ejs -->
+<footer>
+    <div class="footer-container">
+        <!-- Social media icons -->
+        <div class="social-icons">
+            <a href="https://www.linkedin.com/in/yourprofile" target="_blank">
+                <img src="/path/to/linkedin-icon.png" alt="LinkedIn" class="social-icon">
+            </a>
+            <a href="https://github.com/yourprofile" target="_blank">
+                <img src="/path/to/github-icon.png" alt="GitHub" class="social-icon">
+            </a>
+            <a href="https://twitter.com/yourprofile" target="_blank">
+                <img src="/path/to/twitter-icon.png" alt="Twitter" class="social-icon">
+            </a>
+            <a href="/portfolio" target="_blank">
+                <img src="/path/to/portfolio-icon.png" alt="Portfolio" class="social-icon">
+            </a>
+        </div>
+
+        <!-- Copyright and trademark -->
+        <div class="copyright">
+            <p>&copy; <span id="current-year"></span> Natnael Haile. All rights reserved.</p>
+        </div>
+    </div>
+</footer>
+
+<!-- Script to display current year in footer -->
+<script>
+    document.getElementById("current-year").textContent = new Date().getFullYear();
+</script>
