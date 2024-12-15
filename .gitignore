@@ -1,0 +1,67 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+debug.log
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
+# Optional npm cache directory
+.npm
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Build output
+dist/
+build/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Temporary files
+*.tmp
+*.temp
+
+# IDE files
+.idea/
+*.iml
+.vscode/
+
+# MongoDB data or dump files
+*.json
+dump/
+
+# Multer uploads (if using for temporary uploads)
+uploads/
+
+# Coverage reports (if using testing frameworks)
+coverage/
+
+# Python-related files (if job scraping scripts are included)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Miscellaneous
+*.swp
+*.swo
+*.bak
+
