@@ -3,15 +3,17 @@
     <div class="header-container">
         <!-- Logo on the left -->
         <div class="logo">
-            <img src="/images/logo.png" alt="Logo" class="logo-img"> <!-- Replace with your logo path -->
+            <a href="/dashboard" title="Return to Dashboard">
+                <img src="/images/logo_m.png" alt="Logo" class="logo-img">
+            </a>
         </div>
 
         <!-- Right section (Profile icon and Signout button) -->
         <div class="header-right">
-            <div class="profile-icon">
-                <img src="" alt="Profile" class="profile-img"> <!-- Replace with your profile icon -->
+            <div class="profile-logout">
+                <a href="/profile" class="fa-solid fa-user" title="Profile Page"></a>
+                <a href="/logout" class="fa-solid fa-right-from-bracket" title="Logout"></a>
             </div>
-            <button class="btn signout-btn" onclick="window.location.href='/signout'">Sign Out</button>
         </div>
     </div>
 </header>

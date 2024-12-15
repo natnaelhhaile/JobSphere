@@ -1,0 +1,461 @@
+/******************************* General body styles *******************************/
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #E9F6F6 !important;
+}
+
+a.fa-brands, a.fa-solid {
+    color: #fff;
+    text-decoration: none;
+}
+
+/******** project-wide success and error alerts *********/
+
+/* Fade-out Animation */
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}
+
+/* Alert Container */
+.alert-container {
+    position: fixed;
+    top: 10px; /* Position at the top of the page */
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.alert {
+    margin-bottom: 10px;
+    padding: 15px;
+    font-size: 1.2rem;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    animation: fadeIn 0.5s ease; /* Fade-in animation */
+    transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
+}
+
+/* Alert Colors */
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.alert-danger {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+/* Smooth fade-out class */
+.alert.fade-out {
+    animation: fadeOut 0.5s ease forwards;
+    pointer-events: none; /* Prevents interaction during fade-out */
+}
+
+.alert.fade {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.alert.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.btn-close {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.75rem;
+}
+
+/****************************** Header styling ******************************/
+
+header {
+    background-color: #7fc0b9;
+    color: white;
+    padding: 10px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+}
+
+.logo img {
+    width: 100px;
+    margin-left: 50px;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+}
+
+.profile-logout{
+    margin-right: 50px;
+}
+
+.profile-logout a{
+    padding-right: 15px;
+}
+
+.signout-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.signout-btn:hover {
+    background-color: #c0392b;
+}
+
+/******************************* Footer styling *******************************/
+
+footer {
+    background-color: #7fc0b9;
+    color: white;
+    padding: 20px 0;
+    text-align: center;
+}
+
+.footer-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.social-icons {
+    margin-bottom: 10px;
+}
+
+.social-icons a {
+    padding: 7px;
+}
+
+.social-icon:hover {
+    filter: grayscale(0%);
+}
+
+/* Copyright text styling */
+.copyright {
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+/******************************** Signup/Login Pages ********************************/
+
+.logon-form{
+    width: 45% !important;
+}
+
+.logon-form .submit-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+/******************************* Dashboard Styling *******************************/
+
+.jobs-container {
+    padding-top: 75px;
+    width: 75% !important;
+}
+
+.job-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+    background-color: hwb(0 98% 2%);
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.job-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.job-logo {
+    width: 50px;
+    height: 50px;
+    object-fit: contain;
+    border-radius: 5px;
+}
+
+.job-title {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+.job-location,
+.job-salary,
+.job-type {
+    font-size: 1rem;
+    margin-top: 10px;
+}
+
+.job-type span {
+    font-weight: bold;
+    color: #28a745;
+}
+
+.remote-status {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #007bff;
+}
+
+.btn-info {
+    background-color: #085fa5;
+}
+
+.btn-info:hover {
+    background-color: #138496;
+}
+
+btn-group {
+    position: relative;
+    float: right!important;
+}
+
+.btn-group .btn {
+    display: flex;
+    align-items: center;
+    padding: 10px 15px;
+    font-size: 14px;
+    /* font-weight: bold; */
+    border: none;
+    border-radius: 5px;
+    margin-right: 5px;
+    color: white;
+}
+
+/* Add color styles for each site */
+
+.active-filter {
+    color: #fff;
+    font-weight: bold !important;
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.btn-all {
+    background-color: #6ec8c8 !important;
+    color: white !important;
+}
+
+.btn-linkedin {
+    background-color: #0077b5 !important;
+    color: white !important;
+}
+
+.btn-indeed {
+    background-color: #dbdcf7 !important;
+    color: #1a1fb4 !important;
+}
+
+.btn-glassdoor {
+    background-color: #235333 !important;
+    color: white !important;
+}
+
+.btn-zip_recruiter {
+    background-color: #ff9f1c !important;
+    color: white !important;
+}
+
+.btn-google {
+    background-color: #db4437 !important;
+    color: white !important;
+}
+
+.icon {
+    width: 18px;
+    height: 18px;
+    margin: 0 3px 4px;
+}
+
+.job-filter .btn .fab {
+    margin-right: 5px !important;
+}
+
+.pagination-btn.active {
+    background-color: #007bff !important;
+    color: #fff !important;
+}
+
+.job-logo {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    margin-right: 10px;
+}
+
+/******************************* Upload Resume *******************************/
+
+.reupload-msg {
+    color: #28a745;
+    text-align: center;
+    font-weight: bold;
+}
+
+/******************************* Profile Page *******************************/
+
+.profile-page-list {
+    width: 35%;
+    text-align: center !important;
+}
+
+.d-flex h1 i {
+    font-size: 2rem; /* Adjust icon size */
+    color: #3f3f3f; /* Customize color */
+}
+
+.d-flex h6 {
+    font-size: 1rem; /* Adjust text size */
+    color: #555; /* Customize color */
+}
+
+/******************************** Landing Pgae ********************************/
+
+.body-landing-page {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+}
+
+/* Hero Section */
+.hero-section {
+    padding: 100px 0;
+}
+
+.hero-section h1 {
+    font-size: 2.5rem;
+    color: #2c3e50;
+}
+
+.hero-section p {
+    font-size: 1.2rem;
+    color: #34495e;
+}
+
+.hero-section img {
+    max-width: 100%;
+    border-radius: 10px;
+}
+
+/* Features Section */
+.features-section {
+    background-color: #f8f9fa;
+    padding: 60px 0;
+}
+
+.features-section h2 {
+    color: #2c3e50;
+}
+
+.features-section h5 {
+    color: #5d6d7e;
+}
+
+.features-section p {
+    color: #7f8c8d;
+}
+
+/* Application Management Section */
+.application-management-section {
+    background-color: #eaf2f8;
+    padding: 60px 0;
+}
+
+.application-management-section h2 {
+    color: #2c3e50;
+}
+
+.application-management-section h5 {
+    color: #5d6d7e;
+}
+
+.application-management-section p {
+    color: #7f8c8d;
+}
+
+/* Resume Parsing Section */
+.resume-parsing-section {
+    background-color: #f8f9fa;
+    padding: 60px 0;
+}
+
+.pyramid {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.pyramid-level {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.pyramid-level h5 {
+    font-weight: bold;
+}
+
+.pyramid-level p {
+    font-size: 0.9rem;
+}
+
+/* Call-to-Action Section */
+.cta-section {
+    background: linear-gradient(to right, #edf2fb, #d7e3fc);
+    padding: 60px 0;
+}
+
+.cta-section h2 {
+    color: #2c3e50;
+    margin-bottom: 40px;
+}
+
+.cta-section h5 {
+    font-weight: bold;
+}
+
+.cta-section p {
+    color: #7f8c8d;
+}
+
+.signup-btns-homepage .btn-1 {
+    background-color: #7fc0b9;
+    color: #fff;
+}
+
+.signup-btns-homepage .btn-2 {
+    border-color: #7fc0b9;
+    background-color: none;
+    color: #7fc0b9;
+}

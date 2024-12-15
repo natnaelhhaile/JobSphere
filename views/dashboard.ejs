@@ -4,46 +4,86 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link href="/styles.css" rel="stylesheet">
+    <link href="/css/styles.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
+    <script src="https://kit.fontawesome.com/f583d957c8.js" crossorigin="anonymous"></script>
+    <link rel="icon" type="image/png" href="/images/favicon.ico">
+</head>    
 <body>
 
     <!-- Include Header -->
     <%- include('header') %>
 
-    <div class="container">
-        <h2 class="my-5">Your Recommended Jobs</h2>
-        
-        <!-- Check if there are any jobs -->
-        <% if (jobs.length > 0) { %>
-            <div class="row">
-                <% jobs.forEach(job => { %>
-                    <div class="col-md-4">
-                        <div class="job-card">
-                            <div class="d-flex align-items-center">
-                                <img src="<%= job.company_logo %>" alt="<%= job.company %> logo" class="job-logo">
-                                <div class="ms-3">
-                                    <h5 class="job-title"><%= job.title %></h5>
-                                    <p><strong><%= job.company %></strong></p>
-                                </div>
-                            </div>
-                            <p class="job-location"><strong>Location:</strong> <%= job.location %></p>
-                            <p class="job-salary"><strong>Salary:</strong> <%= job.salary ? (job.salary.min_amount ? `$${job.salary.min_amount} - $${job.salary.max_amount} ${job.salary.currency}` : 'Not specified') : 'Not specified' %></p>
-                            <p class="remote-status"><strong>Remote:</strong> <%= job.is_remote ? 'Yes' : 'No' %></p>
-                            <a href="<%= job.job_url %>" class="btn btn-info">View Job</a>
-                        </div>
-                    </div>
-                <% }); %>
+    <div class="alert-container">
+        <!-- Display success message -->
+        <% if (success_msg) { %>
+            <div id="success-alert" class="alert alert-success alert-dismissible fade show" role="alert">
+                <%= success_msg %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-        <% } else { %>
-            <!-- If no jobs, show resume upload link -->
-            <p>No jobs found for you. <a href="/uploadResume" class="btn btn-primary">Upload your Resume</a> to get personalized job recommendations.</p>
+        <% } %>
+    
+        <!-- Display error message -->
+        <% if (error_msg) { %>
+            <div id="error-alert" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <%= error_msg %>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
         <% } %>
     </div>
+
+    
+    <!-- Check if there are any jobs -->
+    <% if (Array.isArray(jobs) && jobs.length > 0) { %>
+
+    <div class="container">
+        <!-- Filter buttons -->
+        <div class="job-filter btn-group mt-3 ms-auto" style="float: right;">
+            <button class="btn btn-all" onclick="filterJobs('all')">
+                All (<%= totalJobs %>)
+            </button>
+            <button class="btn btn-linkedin" onclick="filterJobs('linkedin')">
+                <i class="fab fa-linkedin"></i> LinkedIn (<%= jobCounts.linkedin %>)
+            </button>
+            <button class="btn btn-indeed" onclick="filterJobs('indeed')">
+                <img src="/images/icons/indeed.png" alt="Indeed" class="icon"> Indeed (<%= jobCounts.indeed %>)
+            </button>
+            <button class="btn btn-glassdoor" onclick="filterJobs('glassdoor')">
+                <img src="/images/icons/glassdoor.png" alt="Glassdoor" class="icon"> Glassdoor (<%= jobCounts.glassdoor %>)
+            </button>
+            <button class="btn btn-zip_recruiter" onclick="filterJobs('zip_recruiter')">
+                ZipRecruiter (<%= jobCounts.zip_recruiter %>)
+            </button>
+            <button class="btn btn-google" onclick="filterJobs('google')">
+                <i class="fab fa-google"></i> Google (<%= jobCounts.google %>)
+            </button>
+        </div>
+    </div>
+
+
+    <div class="container jobs-container">        
+        <h2>Your Recommended Jobs</h2>
+        <div id="jobs-list" class="row"></div>
+        <div id="no-jobs-msg" style="display: none; text-align: center; margin-top: 20px;">
+            <p>No jobs found. Try uploading your resume or adjusting the filters.</p>
+        </div>
+    
+        <!-- Pagination -->
+        <div class="pagination-container text-center my-4"></div>
+    </div>
+    
+
+    <% } else { %>
+        <div class="container">
+            <p>No jobs found for you. <a href="/uploadResume" class="btn btn-primary">Upload your Resume</a> to get personalized job recommendations.</p>
+        </div>
+    <% } %>
 
     <!-- Include Footer -->
     <%- include('footer') %>
 
+    <!-- Link to your external JS file -->
+    <script src="/js/dashboard.js"></script>
+    <script src="/js/script.js"></script>
 </body>
 </html>

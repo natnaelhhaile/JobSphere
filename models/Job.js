@@ -2,10 +2,12 @@ const mongoose = require('mongoose');
 
 // Define the Job schema
 const jobSchema = new mongoose.Schema({
+    site: {type: String, required: true},
     title: { type: String, required: true },
     company: { type: String, required: true },
     location: { type: String, required: true },
-    job_url: { type: String, required: true },  
+    job_url: { type: String, required: true },
+    job_url_direct: {type: String},  
     date_posted: { type: Date, default: Date.now },
     job_type: { type: String },
     salary: {
