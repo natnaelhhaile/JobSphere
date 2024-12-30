@@ -1,96 +1,135 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const displayMessage = (type, message) => {
-        console.log(type)
-        console.log(message)
-        // Create the message container
-        const messageDiv = document.createElement('div');
-        messageDiv.className = `alert alert-${type} position-fixed top-0 start-50 translate-middle-x mt-3 fade show`;
-        messageDiv.style.zIndex = '1050'; // Ensure it appears on top
-        messageDiv.setAttribute('role', 'alert');
-        messageDiv.textContent = message;
 
-        // Append to the body
-        document.body.appendChild(messageDiv);
+    const proceedToPasswordButton = document.getElementById('proceedToPassword');
+    const step1Form = document.getElementById('deleteAccountStep1');
+    const step2Form = document.getElementById('deleteAccountStep2');
 
-        // Auto-dismiss after 3 seconds
+    // Handle "Yes, Proceed" button click
+    proceedToPasswordButton.addEventListener('click', () => {
+        // Hide Step 1 and show Step 2
+        step1Form.classList.add('d-none');
+        step2Form.classList.remove('d-none');
+    });
+
+    // Reset modal to Step 1 when it is closed
+    const deleteAccountModal = document.getElementById('deleteAccountModal');
+    deleteAccountModal.addEventListener('hidden.bs.modal', () => {
+        step1Form.classList.remove('d-none');
+        step2Form.classList.add('d-none');
+    });
+
+    const showFlashMessage = (type, message) => {
+        const flashContainer = document.getElementById('flash-messages');
+        if (!flashContainer) {
+            console.error('Flash message container not found.');
+            return;
+        }
+
+        flashContainer.innerHTML = `
+            <div class="alert-container">
+                <div id="${type}-alert" class="alert alert-${type} alert-dismissible fade show" role="alert">
+                    ${message}
+                </div>
+            </div>
+        `;
+
         setTimeout(() => {
-            messageDiv.classList.remove('show');
-            messageDiv.addEventListener('transitionend', () => messageDiv.remove());
+            flashContainer.innerHTML = '';
         }, 5000);
     };
 
     const handleFormSubmission = async (endpoint, formData, options = {}) => {
+        const loadingOverlay = document.getElementById('loading-overlay');
         try {
+            // Hide modal if modalId is provided
+            if (options.modalId) {
+                const modal = document.getElementById(options.modalId);
+                const bootstrapModal = bootstrap.Modal.getInstance(modal);
+                if (bootstrapModal) {
+                    bootstrapModal.hide();
+                }
+            }
+
+            // Show loading overlay
+            loadingOverlay.style.display = 'flex';
+
             const response = await fetch(endpoint, {
                 method: options.method || 'POST',
                 credentials: 'include',
                 headers: options.isFileUpload ? undefined : { 'Content-Type': 'application/json' },
                 body: options.isFileUpload ? formData : JSON.stringify(formData),
             });
-
+    
+            const data = await response.json();
+    
+            // Display flash messages
+            if (data.type && data.message) {
+                showFlashMessage(data.type, data.message);
+            }
+    
             if (response.ok) {
+                console.log(`${endpoint} succeeded.`);
+
+                // Update the username dynamically if provided in the response
+                if (data.username) {
+                    const usernameElement = document.querySelector('.profile-page-list h6.mb-0');
+                    if (usernameElement) {
+                        usernameElement.textContent = data.username;
+                    }
+                }
+    
+                // Redirect or reload based on the options
                 if (options.redirectAfter) {
                     window.location.href = options.redirectAfter;
-                } else {
-                    location.reload();
-                }
-                displayMessage('success', options.successMessage);
-            } else {
-                const error = await response.json();
-                displayMessage('danger', error.message || 'An error occurred.');
+                    // Display flash messages
+                    // const data = await response.json();
+                    // if (data.type && data.message) {
+                    //     showFlashMessage(data.type, data.message);
+                    // }
+                    // console.log(data.type, data.message);
+                } 
             }
         } catch (err) {
             console.error(`Error submitting to ${endpoint}:`, err);
-            displayMessage('danger', 'An unexpected error occurred. Please try again.');
+            showFlashMessage('danger', 'An unexpected error occurred. Please try again.');
+        } finally {
+            // Hide loading overlay
+            loadingOverlay.style.display = 'none';
         }
     };
-
-    displayMessage('success', success_msg);
-    displayMessage('error', error_msg);
-
     
 
-    const setupFormHandler = ({ modalId, endpoint, fields, successMessage, isFileUpload, redirectAfter }) => {
-        const modal = document.getElementById(modalId);
-        if (modal) {
-            const form = modal.querySelector('form');
+    const setupFormHandler = ({ formId, endpoint, fields, modalId, redirectAfter, isFileUpload }) => {
+        const form = document.getElementById(formId);
+        if (form) {
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                let formData;
     
+                let formData;
                 if (isFileUpload) {
-                    // Handle file upload
                     formData = new FormData(form);
-                } else if (fields) {
-                    // Handle standard field submission
+                } else {
                     formData = fields.reduce((data, field) => {
                         data[field] = form.querySelector(`#${field}`).value;
                         return data;
                     }, {});
-                } else {
-                    // No fields required (e.g., delete account action)
-                    formData = {};
                 }
     
-                await handleFormSubmission(endpoint, formData, {
-                    isFileUpload,
-                    successMessage,
-                    redirectAfter,
-                });
+                await handleFormSubmission(endpoint, formData, { modalId, redirectAfter, isFileUpload });
             });
         }
     };
     
-    // Setup forms for modals
-    const modalsConfig = [
-        { modalId: 'editUsernameModal', endpoint: '/profile/edit-username', fields: ['username'], successMessage: 'Username updated successfully!' },
-        { modalId: 'addEmailModal', endpoint: '/profile/add-email', fields: ['email'], successMessage: 'Email added successfully!' },
-        { modalId: 'addPhoneModal', endpoint: '/profile/add-phone', fields: ['phone'], successMessage: 'Phone number added successfully!' },
-        { modalId: 'uploadResumeModal', endpoint: '/uploadResume', isFileUpload: true, successMessage: 'Resume uploaded successfully!' },
-        { modalId: 'deleteAccountModal', endpoint: '/profile/delete-account', successMessage: 'Account deleted successfully!', redirectAfter: '/signup' },
-        { modalId: 'changePasswordModal', endpoint: '/profile/change-password', fields: ['currentPassword', 'newPassword'], successMessage: 'Password updated successfully!' },
+
+    // Set up form handlers
+    const formsConfig = [
+        { formId: 'editUsernameForm', modalId: 'editUsernameModal', endpoint: '/profile/edit-username', fields: ['username'], redirectAfter: false  },
+        { formId: 'changePasswordForm', modalId: 'changePasswordModal', endpoint: '/profile/change-password', fields: ['currentPassword', 'newPassword'], redirectAfter: false },
+        { formId: 'addEmailForm', modalId: 'addEmailModal', endpoint: '/profile/add-email', fields: ['email'], redirectAfter: false },
+        { formId: 'addPhoneForm', modalId: 'addPhoneModal', endpoint: '/profile/add-phone', fields: ['phone'], redirectAfter: false },
+        { formId: 'deleteAccountModal', modalId: 'deleteAccountModal', endpoint: '/profile/delete-account', fields: ['password'], redirectAfter: '/' },
+        { formId: 'uploadResumeForm', modalId: 'uploadResumeModal', endpoint: '/uploadResume', isFileUpload: true, redirectAfter: false },
     ];
 
-    modalsConfig.forEach(setupFormHandler);
+    formsConfig.forEach(setupFormHandler);
 });
-

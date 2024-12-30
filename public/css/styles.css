@@ -1,14 +1,52 @@
 /******************************* General body styles *******************************/
+:root {
+    /* --primary-color: #7fc0b9; */
+    --primary-color: #85cbcb;
+    --bg-color: #E9F6F6;
+}
+
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #E9F6F6 !important;
+    background-color: var(--bg-color) !important;
+    min-height: 100vh !important;
+    display: flex;
+    flex-direction: column;
 }
 
 a.fa-brands, a.fa-solid {
     color: #fff;
     text-decoration: none;
+}
+
+a[href=''] {
+    pointer-events: none;
+    text-decoration: none;
+}
+
+/* project-wide button 1 & 2 styles */
+
+.btn-1 {
+    background-color: var(--primary-color) !important;
+    color: #fff !important;
+}
+
+.btn-2 {
+    border-color: var(--primary-color) !important;
+    background-color: transparent !important;
+    color: var(--primary-color) !important;
+}
+
+.btn-1:hover {
+    border-color: var(--primary-color) !important;
+    background-color: transparent !important;
+    color: var(--primary-color) !important;
+}
+
+.btn-2:hover {
+    background-color: var(--primary-color) !important;
+    color: #fff !important;
 }
 
 /******** project-wide success and error alerts *********/
@@ -35,10 +73,10 @@ a.fa-brands, a.fa-solid {
     text-align: center;
 }
 
-.alert {
+.alert-container.alert {
     margin-bottom: 10px;
     padding: 15px;
-    font-size: 1.2rem;
+    font-size: 1rem;
     text-align: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
     border-radius: 5px;
@@ -84,7 +122,7 @@ a.fa-brands, a.fa-solid {
 /****************************** Header styling ******************************/
 
 header {
-    background-color: #7fc0b9;
+    background-color: var(--primary-color);
     color: white;
     padding: 10px 20px;
     display: flex;
@@ -99,9 +137,11 @@ header {
     align-items: center;
 }
 
-.logo img {
+.logo .logo-img {
     width: 100px;
     margin-left: 50px;
+    border-radius: 10px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }
 
 .header-right {
@@ -132,11 +172,18 @@ header {
 
 /******************************* Footer styling *******************************/
 
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+}
+
 footer {
-    background-color: #7fc0b9;
+    background-color: var(--primary-color);
     color: white;
     padding: 20px 0;
     text-align: center;
+    flex-shrink: 0;
 }
 
 .footer-container {
@@ -154,11 +201,10 @@ footer {
     padding: 7px;
 }
 
-.social-icon:hover {
-    filter: grayscale(0%);
+.social-icons a:hover {
+    color: #585656 !important;
 }
 
-/* Copyright text styling */
 .copyright {
     font-size: 14px;
     margin-top: 10px;
@@ -167,20 +213,42 @@ footer {
 /******************************** Signup/Login Pages ********************************/
 
 .logon-form{
-    width: 45% !important;
+    width: 40% !important;
 }
 
-.logon-form .submit-button {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+.logon-img {
+    width: 150px;
+    height: 100px;
 }
 
 /******************************* Dashboard Styling *******************************/
 
 .jobs-container {
-    padding-top: 75px;
+    margin-top: 35px;
+    width: 75% !important;
+}
+
+.jobs-pagination {
+    width: 75%;
+}
+
+#jobs-list {
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    flex-wrap: wrap; 
+    padding: 20px; 
+    box-sizing: border-box;
+    margin: 35px auto;
+}
+
+#no-jobs-msg {
+    display: none; 
+    text-align: center; 
+    margin-top: 20px;
+}
+
+.job-item {
     width: 75% !important;
 }
 
@@ -188,7 +256,6 @@ footer {
     border: 1px solid #ddd;
     border-radius: 8px;
     padding: 16px;
-    margin-bottom: 20px;
     background-color: hwb(0 98% 2%);
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s;
@@ -227,14 +294,6 @@ footer {
     font-size: 1rem;
     font-weight: bold;
     color: #007bff;
-}
-
-.btn-info {
-    background-color: #085fa5;
-}
-
-.btn-info:hover {
-    background-color: #138496;
 }
 
 btn-group {
@@ -303,16 +362,17 @@ btn-group {
     margin-right: 5px !important;
 }
 
-.pagination-btn.active {
-    background-color: #007bff !important;
-    color: #fff !important;
-}
-
 .job-logo {
     width: 50px;
     height: 50px;
     object-fit: cover;
     margin-right: 10px;
+}
+
+.pagination-btn {
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    margin: 0 2px;
 }
 
 /******************************* Upload Resume *******************************/
@@ -340,7 +400,29 @@ btn-group {
     color: #555; /* Customize color */
 }
 
-/******************************** Landing Pgae ********************************/
+#loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1050; /* Ensure it appears on top */
+}
+
+.spinner-border {
+    width: 3rem;
+    height: 3rem;
+}
+
+.custom-spinner {
+    color: var(--primary-color) !important;
+}
+
+/******************************** Home/Landing Pgae ********************************/
 
 .body-landing-page {
     font-family: Arial, sans-serif;
@@ -371,7 +453,6 @@ btn-group {
 
 /* Features Section */
 .features-section {
-    background-color: #f8f9fa;
     padding: 60px 0;
 }
 
@@ -389,7 +470,6 @@ btn-group {
 
 /* Application Management Section */
 .application-management-section {
-    background-color: #eaf2f8;
     padding: 60px 0;
 }
 
@@ -407,7 +487,6 @@ btn-group {
 
 /* Resume Parsing Section */
 .resume-parsing-section {
-    background-color: #f8f9fa;
     padding: 60px 0;
 }
 
@@ -432,7 +511,6 @@ btn-group {
 
 /* Call-to-Action Section */
 .cta-section {
-    background: linear-gradient(to right, #edf2fb, #d7e3fc);
     padding: 60px 0;
 }
 
@@ -449,13 +527,11 @@ btn-group {
     color: #7f8c8d;
 }
 
-.signup-btns-homepage .btn-1 {
-    background-color: #7fc0b9;
-    color: #fff;
-}
+/********************************* jobPost Page *********************************/
 
-.signup-btns-homepage .btn-2 {
-    border-color: #7fc0b9;
-    background-color: none;
-    color: #7fc0b9;
+.card-body {
+    background-color: rgb(254, 247, 238);
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    color: #444 !important;
 }

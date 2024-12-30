@@ -1,44 +1,50 @@
 const jobsPerPage = 8; // Jobs per page
 
+function fixUnclosedTags(description) {
+    // Create a temporary div element to parse the HTML
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(description, 'text/html');
+    return doc.body.innerHTML;  // Returns properly closed HTML
+}
+
 // Function to render jobs based on the current filter and page
 function renderJobs(filter, jobs, currentPage, totalJobs) {
     const jobsList = document.getElementById('jobs-list');
     const noJobsMsg = document.getElementById('no-jobs-msg');
+    const paginationContainer = document.querySelector('.pagination-container');
     
     if (totalJobs === 0 || jobs.length === 0) {
-        noJobsMsg.style.display = 'block'; // Show "No jobs" message
         jobsList.innerHTML = '';
+        paginationContainer.innerHTML = '';
+        noJobsMsg.style.display = 'block'; // Show "No jobs" message
     } else {
         jobsList.innerHTML = ''; // Clear the previous content
         noJobsMsg.style.display = 'none'; // Hide "No jobs" message
 
-        const start = (currentPage - 1) * jobsPerPage;
-        const paginatedJobs = jobs.slice(start, start + jobsPerPage);
-
         // Render job cards
-        jobsList.innerHTML = paginatedJobs
+        jobsList.innerHTML = jobs
             .map(
                 (job) => `
-            <div class="col-md-12 job-item mb-4" data-site="${job.site.toLowerCase()}">
+            <div class="job-item mb-4" data-site="${job.site.toLowerCase()}">
                 <div class="job-card p-3">
                     <div class="d-flex align-items-center">
-                        <img src="${job.company_logo}" alt="${job.company} logo" class="job-logo">
+                        <img src="${job.company_logo ? job.company_logo : '/images/default-logo.png'}" alt="${job.company} logo" class="job-logo">
                         <div class="ms-3">
                             <h5 class="job-title">${job.title}</h5>
                             <p><strong>${job.company}</strong></p>
                         </div>
                     </div>
                     <p class="job-location"><strong>Location:</strong> ${job.location}</p>
-                    <p class="job-description">
-                        ${job.description.length > 150 ? job.description.slice(0, 150) + '...' : job.description}
-                    </p>
+                    ${fixUnclosedTags(job.description.length > 150 ? job.description.slice(0, 150) + '...' : job.description)}
                     <p class="job-salary"><strong>Salary:</strong> ${
                         job.salary && job.salary.min_amount !== null && job.salary.max_amount !== null
                             ? `${job.salary.min_amount} - ${job.salary.max_amount} ${job.salary.currency}`
                             : 'Not specified'
                     }</p>
                     <p class="remote-status"><strong>Remote:</strong> ${job.is_remote ? 'Yes' : 'No'}</p>
-                    <a href="${job.job_url}" class="btn btn-info">View Job</a>
+                    <div class="text-center">
+                        <a href="/jobs/${job._id}" target="_blank" class="btn btn-1">View Job</a>
+                    </div>
                 </div>
             </div>`
             )
@@ -57,9 +63,10 @@ function renderPagination(filter, totalJobs, currentPage) {
 
     for (let i = 1; i <= totalPages; i++) {
         const button = document.createElement('button');
-        button.className = "btn btn-outline-primary pagination-btn mx-1";
+        button.className = "btn btn-2 pagination-btn";
         if (i === currentPage) {
-            button.classList.add('active');
+            button.classList.replace('btn-2', 'btn-1');
+            button.setAttribute('aria-current', 'page'); // Accessibility enhancement
         }
         button.textContent = i;
         button.onclick = () => {
@@ -72,7 +79,7 @@ function renderPagination(filter, totalJobs, currentPage) {
 // Filter jobs when a button is clicked
 function filterJobs(site) {
     currentPage = 1; // Reset to the first page
-    document.querySelectorAll('.job-filter button').forEach((btn) =>
+    document.querySelectorAll('.job-filter.btn').forEach((btn) =>
         btn.classList.remove('active-filter')
     );
     document.querySelector(`.btn-${site}`).classList.add('active-filter'); // Highlight the selected button
@@ -81,7 +88,12 @@ function filterJobs(site) {
 
 // Fetch jobs and render them
 async function fetchJobs(filter = 'all', page = 1) {
+    const loadingOverlay = document.getElementById('loading-overlay');
     try {
+
+        // Show loading overlay
+        loadingOverlay.style.display = 'flex';
+
         const url = `/dashboard/jobs?site=${filter}&page=${page}`;
         const response = await fetch(url, {
              credentials: 'include',
@@ -110,6 +122,9 @@ async function fetchJobs(filter = 'all', page = 1) {
         }
     } catch (err) {
         console.error('Error fetching jobs:', err);
+    } finally {
+        // Hide loading overlay
+        loadingOverlay.style.display = 'none';
     }
 }
 

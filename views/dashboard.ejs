@@ -13,71 +13,72 @@
 
     <!-- Include Header -->
     <%- include('header') %>
-
-    <div class="alert-container">
-        <!-- Display success message -->
-        <% if (success_msg) { %>
-            <div id="success-alert" class="alert alert-success alert-dismissible fade show" role="alert">
-                <%= success_msg %>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        <% } %>
+    <div class="wrapper">
     
-        <!-- Display error message -->
-        <% if (error_msg) { %>
-            <div id="error-alert" class="alert alert-danger alert-dismissible fade show" role="alert">
-                <%= error_msg %>
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        <% } %>
-    </div>
-
-    
-    <!-- Check if there are any jobs -->
-    <% if (Array.isArray(jobs) && jobs.length > 0) { %>
-
-    <div class="container">
-        <!-- Filter buttons -->
-        <div class="job-filter btn-group mt-3 ms-auto" style="float: right;">
-            <button class="btn btn-all" onclick="filterJobs('all')">
-                All (<%= totalJobs %>)
-            </button>
-            <button class="btn btn-linkedin" onclick="filterJobs('linkedin')">
-                <i class="fab fa-linkedin"></i> LinkedIn (<%= jobCounts.linkedin %>)
-            </button>
-            <button class="btn btn-indeed" onclick="filterJobs('indeed')">
-                <img src="/images/icons/indeed.png" alt="Indeed" class="icon"> Indeed (<%= jobCounts.indeed %>)
-            </button>
-            <button class="btn btn-glassdoor" onclick="filterJobs('glassdoor')">
-                <img src="/images/icons/glassdoor.png" alt="Glassdoor" class="icon"> Glassdoor (<%= jobCounts.glassdoor %>)
-            </button>
-            <button class="btn btn-zip_recruiter" onclick="filterJobs('zip_recruiter')">
-                ZipRecruiter (<%= jobCounts.zip_recruiter %>)
-            </button>
-            <button class="btn btn-google" onclick="filterJobs('google')">
-                <i class="fab fa-google"></i> Google (<%= jobCounts.google %>)
-            </button>
-        </div>
-    </div>
-
-
-    <div class="container jobs-container">        
-        <h2>Your Recommended Jobs</h2>
-        <div id="jobs-list" class="row"></div>
-        <div id="no-jobs-msg" style="display: none; text-align: center; margin-top: 20px;">
-            <p>No jobs found. Try uploading your resume or adjusting the filters.</p>
+        <div class="alert-container">
+            <!-- Display success message -->
+            <% if (success_msg) { %>
+                <div id="success-alert" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <%= success_msg %>
+                    <!-- <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> -->
+                </div>
+            <% } %>
+        
+            <!-- Display error message -->
+            <% if (error_msg) { %>
+                <div id="danger-alert" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <%= error_msg %>
+                    <!-- <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> -->
+                </div>
+            <% } %>
         </div>
     
-        <!-- Pagination -->
-        <div class="pagination-container text-center my-4"></div>
-    </div>
-    
-
-    <% } else { %>
         <div class="container">
-            <p>No jobs found for you. <a href="/uploadResume" class="btn btn-primary">Upload your Resume</a> to get personalized job recommendations.</p>
+            <!-- Filter buttons -->
+            <div class="job-filter btn-group mt-3 ms-auto" style="float: right;">
+                <button class="btn btn-all" onclick="filterJobs('all')">
+                    All (<%= totalJobs %>)
+                </button>
+                <button class="btn btn-linkedin" onclick="filterJobs('linkedin')">
+                    <i class="fab fa-linkedin"></i> LinkedIn (<%= jobCounts.linkedin %>)
+                </button>
+                <button class="btn btn-indeed" onclick="filterJobs('indeed')">
+                    <img src="/images/icons/indeed.png" alt="Indeed" class="icon"> Indeed (<%= jobCounts.indeed %>)
+                </button>
+                <button class="btn btn-glassdoor" onclick="filterJobs('glassdoor')">
+                    <img src="/images/icons/glassdoor.png" alt="Glassdoor" class="icon"> Glassdoor (<%= jobCounts.glassdoor %>)
+                </button>
+                <button class="btn btn-zip_recruiter" onclick="filterJobs('zip_recruiter')">
+                    ZipRecruiter (<%= jobCounts.zip_recruiter %>)
+                </button>
+                <button class="btn btn-google" onclick="filterJobs('google')">
+                    <i class="fab fa-google"></i> Google (<%= jobCounts.google %>)
+                </button>
+            </div>
         </div>
-    <% } %>
+    
+    
+        <div class="container jobs-container"> 
+            <h2>Your Recommended Jobs</h2>
+            <div id="jobs-list" class="row mx-auto">
+                <!-- Job cards will be dynamically rendered here -->
+            </div>
+            <div id="no-jobs-msg">
+                <p>No jobs found. Try adjusting the filters or uploading your resume in the profile page.</p>
+            </div>
+        
+            <!-- Pagination -->
+            <div class="pagination-container text-center my-4"></div>
+        </div>
+        
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" style="display: none;">
+        <div class="spinner-border custom-spinner" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
 
     <!-- Include Footer -->
     <%- include('footer') %>

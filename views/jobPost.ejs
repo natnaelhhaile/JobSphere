@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= job.title %> | <%= job.company %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">    
+    <script src="https://kit.fontawesome.com/f583d957c8.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="icon" type="image/png" href="/images/favicon.ico">
+</head>
+<body>
+    <!-- Header -->
+    <%- include('header') %>
+
+    <div class="container my-5">
+        <!-- Job Header Section -->
+        <div class="row mb-4">
+            <div class="col-md-2 text-center">
+                <% if (job.company_logo) { %>
+                    <img src="<%= job.company_logo %>" alt="<%= job.company %> Logo" width="100" class="img-fluid rounded mb-3">
+                <% } else { %>
+                    <img src="/images/default-logo.png" alt="Default Company Logo" width="100" class="img-fluid rounded mb-3">
+                <% } %>
+            </div>
+            <div class="col-md-8">
+                <h1 class="display-5"><%= job.title %></h1>
+                <a href="<%= job.company_url || ''  %>"
+                    style="text-decoration: none;"
+                    target="<%= job.company_url ? '_blank' : '_self' %>"
+                    rel="<%= job.company_url ? 'noopener noreferrer' : '' %>">
+                    <p class="lead text-muted"><strong><%= job.company %></strong> - <%= job.location %></p>
+                </a>
+                <% if (job.is_remote) { %>
+                    <p class="text-success"><i class="fa-solid fa-laptop-house"></i> Remote</p>
+                <% } %>
+            </div>
+            <div class="col-md-2">
+                <% 
+                    const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+                    const isIconSite = ['glassdoor', 'indeed'].includes(job.site);
+                    const url = isIconSite ? `/images/icons/${job.site}.png` : null;
+                %>
+                <button class="btn btn-<%= job.site %>" onclick="window.location.href='<%= job.job_url %>'">
+                    <% if (isIconSite) { %>
+                        <img src=<%= url %> alt="<%= capitalize(job.site) %>" class="icon"> <%= job.site.toUpperCase() %>
+                    <% } else { %>
+                        <i class="fab fa-<%= job.site %>"></i> <%= capitalize(job.site) %> 
+                    <% } %>
+                </button>
+            </div>
+        </div>
+
+        <!-- Job Details Section -->
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Job Description -->
+                <div class="mb-4">
+                    <h3>Job Description</h3>
+                    <p><%- job.description || 'No description.' %></p>
+                </div>
+
+                <!-- Job Skills -->
+                <% if (job.skills && job.skills.length > 0) { %>
+                    <div class="mb-4">
+                        <h3>Skills Required</h3>
+                        <ul class="list-inline">
+                            <% job.skills.forEach(skill => { %>
+                                <li class="list-inline-item badge bg-primary text-white me-1"><%= skill %></li>
+                            <% }); %>
+                        </ul>
+                    </div>
+                <% } %>
+
+                <!-- Company Information -->
+                <% if (job.company_description) { %>
+                    <div class="mb-4">
+                        <h3>About the Company</h3>
+                        <%- job.company_description %>
+                        <% if (job.company_url) { %>
+                            <a href="<%= job.company_url %>" target="_blank" class="btn btn-1">Visit Company Website</a>
+                        <% } %>
+                    </div>
+                <% } %>
+            </div>
+
+            <!-- Job Sidebar -->
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <!-- Salary -->
+                        <% if (job.salary && (job.salary.min_amount || job.salary.max_amount)) { %>
+                            <h4>Salary</h4>
+                            <p>
+                                <%= job.salary.min_amount ? job.salary.min_amount : "?" %>
+                                - 
+                                <%= job.salary.max_amount ? job.salary.max_amount : "?" %> 
+                                <%= job.salary.currency || "USD" %> 
+                                (<%= job.salary.interval || "per year" %>)
+                            </p>
+                        <% } %>
+
+                        <!-- Job Type -->
+                        <% if (job.job_type) { %>
+                            <h4>Job Type</h4>
+                            <p><%= job.job_type %></p>
+                        <% } %>
+
+                        <!-- Job Level -->
+                        <% if (job.job_level) { %>
+                            <h4>Job Level</h4>
+                            <p><%= job.job_level %></p>
+                        <% } %>
+
+                        <!-- Posted Date -->
+                        <h4>Posted On</h4>
+                        <p><%= new Date(job.date_posted).toLocaleDateString() %></p>
+                    </div>
+                </div>
+
+                <!-- Apply Button -->
+                <a href="<%= job.job_url %>" target="_blank" class="btn btn-1 btn-lg btn-block mb-3">Apply Now</a>
+                <% if (job.job_url_direct) { %>
+                    <a href="<%= job.job_url_direct %>" target="_blank" class="btn btn-2 btn-lg btn-block mb-3">Direct Apply</a>
+                <% } %>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <%- include('footer') %>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</body>
+</html>

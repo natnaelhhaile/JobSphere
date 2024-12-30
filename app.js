@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+require('dotenv').config();
 const path = require('path');
 const multer = require('multer');
 const fs = require('fs');
@@ -12,7 +13,7 @@ const { exec } = require('child_process');
 const cookieParser = require('cookie-parser');
 const expressSession = require('express-session');
 const flash = require('connect-flash');
-const { count } = require('console');
+const marked = require('marked'); // import marked
 const app = express();
 
 // Middleware setup
@@ -61,7 +62,7 @@ const authMiddleware = (req, res, next) => {
         return res.redirect('/login');
     }
 
-    jwt.verify(token, 'your_jwt_secret', (err, decoded) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
         if (err) {
             req.flash('error_msg', 'Failed to authenticate token, please try logging in again!');
             console.log(err)
@@ -256,6 +257,20 @@ app.get('/dashboard/jobs', authMiddleware, async (req, res) => {
     }
 });
 
+app.get('/jobs/:id', async (req, res) => {
+    try {
+        const jobId = new mongoose.Types.ObjectId(req.params.id);
+        const job = await Job.findById(jobId);
+        if (!job) {
+            return res.status(404).send('Job not found');
+        }
+        res.render('jobPost', { job });
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+});
+
 // Function to get stored jobs from MongoDB for a user
 async function getStoredJobs(filter, page) {
     try {
@@ -309,11 +324,6 @@ async function getStoredJobs(filter, page) {
     }
 }
 
-// Route to render the upload resume page
-app.get('/uploadResume', authMiddleware, (req, res) => {
-    res.render('uploadResume');
-});
-
 // Route to handle resume upload
 app.post('/uploadResume', authMiddleware, upload, async (req, res) => {
     if (!req.file) {
@@ -326,14 +336,18 @@ app.post('/uploadResume', authMiddleware, upload, async (req, res) => {
         // Update user document in the database with the new resume details
         const user = await User.findById(userId);
         user.resume = resumeData; // Replace previous resume details with new data
-        console.log(user.resume)
+        // console.log(user.resume)
         await user.save();
-        req.flash('success_msg', 'Resume uploaded successfully!');
-        res.redirect('/dashboard');
+        // Fetch jobs based on the parsed resume data
+        await searchJobsFromResume(user.resume, userId);
+        // req.flash('success_msg', 'Resume uploaded and relevant jobs generated successfully!');
+        // res.redirect('/dashboard');
+        res.status(200).json({ type: 'success', message: 'Resume uploaded and relevant jobs generated successfully!' });
 
     } catch (error) {
-        req.flash('error_msg', 'Error parsing resume. Please try again.');
-        res.redirect('/uploadResume');
+        // req.flash('error_msg', 'Error parsing resume. Please try again.');
+        // res.redirect('/uploadResume');
+        return res.status(500).json({ type: 'danger', message: 'Error parsing resume. Please try again!' });
     }
 });
 
@@ -344,7 +358,7 @@ async function uploadResumeAndParse(filePath) {
     const config = {
         headers: {
             'Content-Type': 'application/octet-stream', // Required for raw binary data
-            'apikey': 'RyfNXIm4bYMJJounWFHYcwbVQXf4AK2M', // Your API key
+            'apikey': process.env.API_KEY, // Your API key
         },
     };
 
@@ -362,22 +376,6 @@ async function uploadResumeAndParse(filePath) {
     } catch (error) {
         console.error('Error during API call:', error.response?.data || error.message || error);
         throw new Error('Failed to parse resume. Please try again later.');
-    }
-}
-
-
-async function retryRequest(requestFunc, retries = 3, delay = 1000) {
-    for (let i = 0; i < retries; i++) {
-        try {
-            return await requestFunc();
-        } catch (error) {
-            if (i < retries - 1) {
-                console.warn(`Retrying... (${i + 1}/${retries})`);
-                await new Promise((resolve) => setTimeout(resolve, delay));
-            } else {
-                throw error; // Rethrow error after all retries
-            }
-        }
     }
 }
 
@@ -445,6 +443,9 @@ async function saveJobsToMongoDB(jobs, userId) {
                 interval: job.interval || 'Hourly'
             };
 
+            const jobDescription = marked(job.description || "") || "No description";
+            const companyDescription = marked(job.company_description || "");
+            
             return {
                 site: job.site,
                 title: job.title,
@@ -452,7 +453,7 @@ async function saveJobsToMongoDB(jobs, userId) {
                 location: job.location,
                 job_url: job.job_url,
                 job_url_direct: job.job_url_direct || null,
-                description: job.description || "No description",
+                description: jobDescription,
                 date_posted: job.date_posted || new Date(),
                 salary: salary || null,
                 is_remote: job.is_remote || false,
@@ -462,7 +463,7 @@ async function saveJobsToMongoDB(jobs, userId) {
                 company_industry: job.company_industry || "Not specified",
                 company_logo: job.company_logo || null,
                 company_url: job.company_url || null,
-                company_description: job.company_description || "No company description",
+                company_description: companyDescription,
                 skills: job.skills || [],
                 user: userId,
             };
@@ -470,6 +471,8 @@ async function saveJobsToMongoDB(jobs, userId) {
 
         // Bulk insert valid jobs
         if (jobDataArray.length > 0) {
+            // Clear existing jobs for the user and insert new ones
+            await Job.deleteMany({ user: userId }); 
             await Job.insertMany(jobDataArray);
             count += jobDataArray.length;
         }
@@ -506,7 +509,6 @@ app.get('/profile', authMiddleware, async (req, res) => {
     }
 });
 
-
 // Route to handle editing username
 app.post('/profile/edit-username', authMiddleware, async (req, res) => {
     const { username } = req.body;
@@ -517,79 +519,93 @@ app.post('/profile/edit-username', authMiddleware, async (req, res) => {
         // Check if the new username already exists
         const existingUser = await User.findOne({ username: newUsername });
         if (existingUser) {
-            req.flash('error_msg', 'Username already exists. Please choose a different one.');
-            return res.redirect('/profile');
+            return res.status(400).json({ type: 'danger', message: 'Username already exists. Please choose a different one.' });
         }
 
         // Update username if it's unique
-        await User.findByIdAndUpdate(userId, { username: newUsername });
-        req.flash('success_msg', 'Username updated successfully!!!');
-        res.redirect('/profile');
+        const user = await User.findByIdAndUpdate(userId, { username: newUsername }, { new: true });
+        res.status(200).json({ type: 'success', message: 'Username updated successfully!', username: user.username });
     } catch (err) {
         console.error('Error updating username:', err);
-        req.flash('error_msg', 'Error updating username. Please try again.');
-        res.redirect('/profile');
+        res.status(500).json({ type: 'danger', message: 'Error updating username. Please try again.' });
     }
 });
 
+// Route to handle changing password
 app.post('/profile/change-password', authMiddleware, async (req, res) => {
     const { currentPassword, newPassword } = req.body;
     const userId = new mongoose.Types.ObjectId(req.userId);
-    const user = await User.findById(userId);
 
-    if (await bcrypt.compare(currentPassword, user.password)) {
+    try {
+        const user = await User.findById(userId);
+
+        if (!(await bcrypt.compare(currentPassword, user.password))) {
+            return res.status(400).json({ type: 'danger', message: 'Current password is incorrect.' });
+        }
+
+        if (await bcrypt.compare(newPassword, user.password)) {
+            return res.status(400).json({ type: 'danger', message: 'New password must be different from your current one.' });
+        }
+
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         user.password = hashedPassword;
         await user.save();
-        req.flash('success_msg', 'Password updated successfully!');
-        res.redirect('/profile');
-    } else {
-        req.flash('error_msg', 'Current password is incorrect');
-        res.redirect('/profile');
+
+        res.status(200).json({ type: 'success', message: 'Password updated successfully!' });
+    } catch (err) {
+        console.error('Error updating password:', err);
+        res.status(500).json({ type: 'danger', message: 'Error updating password. Please try again.' });
     }
 });
 
+// Route to handle adding email
 app.post('/profile/add-email', authMiddleware, async (req, res) => {
     const { email } = req.body;
-    const secondEmail = email;
     const userId = new mongoose.Types.ObjectId(req.userId);
 
     try {
-        await User.findByIdAndUpdate(userId, { secondaryEmail: secondEmail });
-        req.flash('success_msg', 'Secondary email added successfully!');
-        res.redirect('/profile');
+        await User.findByIdAndUpdate(userId, { secondaryEmail: email });
+        res.status(200).json({ type: 'success', message: 'Secondary email added successfully!' });
     } catch (err) {
-        req.flash('error_msg', 'Error adding secondary email');
-        res.redirect('/profile');
+        console.error('Error adding secondary email:', err);
+        res.status(500).json({ type: 'danger', message: 'Error adding secondary email. Please try again.' });
     }
 });
 
+// Route to handle adding phone number
 app.post('/profile/add-phone', authMiddleware, async (req, res) => {
     const { phoneNumber } = req.body;
     const userId = new mongoose.Types.ObjectId(req.userId);
 
     try {
-        await User.findByIdAndUpdate(userId, { phoneNumber: phoneNumber });
-        req.flash('success_msg', 'Phone number added successfully!');
-        res.redirect('/profile');
+        await User.findByIdAndUpdate(userId, { phoneNumber });
+        res.status(200).json({ type: 'success', message: 'Phone number added successfully!' });
     } catch (err) {
-        req.flash('error_msg', 'Error adding phone number');
-        res.redirect('/profile');
+        console.error('Error adding phone number:', err);
+        res.status(500).json({ type: 'danger', message: 'Error adding phone number. Please try again.' });
     }
 });
 
+// Route to handle deleting account
 app.post('/profile/delete-account', authMiddleware, async (req, res) => {
     const userId = new mongoose.Types.ObjectId(req.userId);
+    const { password } = req.body;
 
     try {
+
+        const user = await User.findById(userId);
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            return res.status(400).json({ type: 'danger', message: 'Incorrect password. Account deletion failed!' });
+        }
+
+        // Delete the account and clear the cookies
         await User.findByIdAndDelete(userId);
+        await Job.deleteMany({ user: userId });
         res.clearCookie('token');
-        req.flash('success_msg', 'Account deleted successfully!');
-        // res.status(200).json({ message: 'Account deleted successfully' });
-        res.redirect('/signup');
+        res.status(200).json({ type: 'success', message: 'Account deleted successfully!' });
     } catch (err) {
-        req.flash('error_msg', 'Error deleting account');
-        res.redirect('/profile');
+        console.error('Error deleting account:', err);
+        res.status(500).json({ type: 'danger', message: 'Error deleting account. Please try again.' });
     }
 });
 
