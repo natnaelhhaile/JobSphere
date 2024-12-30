@@ -28,25 +28,32 @@ JobSphere is a web application that helps users find job opportunities based on 
   <img width="350" alt="Landing Page - Alternate Mobile View" src="https://github.com/user-attachments/assets/3046c6c5-4d2a-4d3b-beb2-ebb9f5c40d13" />
 </p>
 
+<p align="center"><strong>Sign-Up/Signin Pages</strong></p>
+<p align="center">
+  <img width="1470" alt="Screenshot 2024-12-29 at 22 01 13" src="https://github.com/user-attachments/assets/1fb66336-10a4-42c0-bb94-491ccf0b8e64" />
+  <img width="1470" alt="Screenshot 2024-12-29 at 22 01 24" src="https://github.com/user-attachments/assets/c494aced-9602-4ee7-ac5d-c66024ac86cf" />
+</p>
+
 <p align="center"><strong>Dashboard with Job Recommendations</strong></p>
 <p align="center">
-  <img width="700" alt="Dashboard" src="https://github.com/user-attachments/assets/86f97948-50a0-4c9f-b06d-324d402ae90b" />
-  <img width="700" alt="Job Listings" src="https://github.com/user-attachments/assets/36a14a62-94fc-4cf2-9815-725b41d948e9" />
+  <img width="1470" alt="Screenshot 2024-12-29 at 21 55 18" src="https://github.com/user-attachments/assets/447e4c3f-5aba-401d-993a-7102614727e8" />
+  <img width="1470" alt="Screenshot 2024-12-29 at 21 55 35" src="https://github.com/user-attachments/assets/8c47c41d-d817-4d55-acca-8bc13b665a1a" />
 </p>
 
 <p align="center"><strong>Profile Page</strong></p>
 <p align="center">
-  <img width="700" alt="Profile Page" src="https://github.com/user-attachments/assets/8a3e7858-62f3-43ce-93d1-eada813791fe" />
+  <img width="1470" alt="Screenshot 2024-12-29 at 21 56 57" src="https://github.com/user-attachments/assets/faadcae9-11f1-4e66-9e9d-277621251828" />
 </p>
 
-<p align="center"><strong>Modal for Editing Username</strong></p>
+<p align="center"><strong>Modal for Uploading a Resume</strong></p>
 <p align="center">
-  <img width="700" alt="Edit Username Modal" src="https://github.com/user-attachments/assets/6b5d0cfb-b8ba-4c70-80a7-2af15ca891b7" />
+  <img width="1470" alt="Screenshot 2024-12-29 at 21 57 23" src="https://github.com/user-attachments/assets/b8571ee6-9a1a-4833-a9fd-082c9303f06a" />
 </p>
 
-<p align="center"><strong>Sign-Up Page</strong></p>
+<p align="center"><strong>Modal for Deleting Your Account</strong></p>
 <p align="center">
-  <img width="350" alt="Sign-Up Page" src="https://github.com/user-attachments/assets/4d59de7e-fd43-4fb8-a0ec-011828927e3a" />
+  <img width="1470" alt="Screenshot 2024-12-29 at 21 57 40" src="https://github.com/user-attachments/assets/7a2747a8-3ee3-4687-875c-bc975d8761da" />
+  <img width="1470" alt="Screenshot 2024-12-29 at 21 57 48" src="https://github.com/user-attachments/assets/bed0e9c4-4ae9-459a-8cfd-03a766c4d17f" />
 </p>
 
 ---
@@ -77,7 +84,7 @@ Make sure you have the following installed:
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/your-username/jobsphere.git
+    git clone https://github.com/curiousityDrives/JobSphere.git
     cd jobsphere
     ```
 
@@ -125,9 +132,14 @@ Make sure you have the following installed:
 - After uploading your resume, the dashboard will show you a list of job opportunities that match your experience and skills.
 - If no jobs are found, you will be prompted to upload a resume.
 
+### Job Posts
+
+- When you click on the any of the jobs on your dashboard, you are redirected to a page where that specific job post's details are displayed, from which you can decide either to apply from the site of the post or directly from the company's site.
+- In this page, you can also find information on the company and links to their profile, if available.
+
 ### Profile
 
-- The profile page allows you to view and manage your user details.
+- The profile page allows you to view and manage your user details. You can edit your username, your password, add a second email, add a phone number, upload another resume, or delete your account.
 
 ---
 
