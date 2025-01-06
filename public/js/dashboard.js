@@ -43,7 +43,7 @@ function renderJobs(filter, jobs, currentPage, totalJobs) {
                     }</p>
                     <p class="remote-status"><strong>Remote:</strong> ${job.is_remote ? 'Yes' : 'No'}</p>
                     <div class="text-center">
-                        <a href="/jobs/${job._id}" target="_blank" class="btn btn-1">View Job</a>
+                        <a href="/dashboard/jobs/${job._id}" target="_blank" class="btn btn-1">View Job</a>
                     </div>
                 </div>
             </div>`

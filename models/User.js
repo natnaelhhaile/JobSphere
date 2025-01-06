@@ -29,10 +29,9 @@ const userSchema = new mongoose.Schema({
             }
         ]
     },
-    jobs: [{ 
-        type: mongoose.Schema.Types.ObjectId, 
-        ref: 'Job' 
-    }]
+    phoneVerified: { type: Boolean, default: false },
+    emailVerified: { type: Boolean, default: false },
+    secondaryEmailVerified: { type: Boolean, default: false },
 });
 
 // Create the User model based on the schema

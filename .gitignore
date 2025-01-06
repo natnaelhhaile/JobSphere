@@ -65,3 +65,5 @@ __pycache__/
 *.swo
 *.bak
 
+# Utilities - config
+config.js
