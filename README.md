@@ -60,7 +60,7 @@ JobSphere is a web application that helps users find job opportunities based on 
 
 ## Technologies Used
 
-- **Frontend:** HTML5, CSS3, Bootstrap, EJS, AJAX
+- **Frontend:** HTML5, CSS3, Bootstrap, EJS, fetch-API
 - **Backend:** Node.js, Express.js
 - **Database:** MongoDB
 - **Resume Parsing:** Integrated with the Resume Parser API
