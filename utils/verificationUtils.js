@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
-const config = require('../utils/config'); // Centralized configuration
+const config = require('../config/configEnv'); // Centralized configuration
 const client = require('twilio')(
     config.TWILIO_ACCOUNT_SID,
     config.TWILIO_AUTH_TOKEN

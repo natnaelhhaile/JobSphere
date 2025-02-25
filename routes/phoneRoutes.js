@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const config = require('../utils/config'); // Centralized configuration
+const config = require('../config/configEnv'); // Centralized configuration
 const { authMiddleware } = require('../utils/authUtils');
 
 // Twilio Credentials

@@ -4,7 +4,9 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const expressSession = require('express-session');
 const flash = require('connect-flash');
-const config = require('./utils/config'); // Centralized configuration
+const passport = require('passport');
+require('./config/passportConfig'); // Passport configuration
+const config = require('./config/configEnv'); // Centralized configuration
 const app = express();
 
 // Routes
@@ -50,7 +52,7 @@ app.use((req, res, next) => {
 
 // MongoDB connection
 mongoose.connect(config.MONGODB_URI)
-    .then(() => console.log('Connected to MongoDB'))
+    .then(() => console.log('Connected to MongoDB Atlas'))
     .catch(err => console.error('Failed to connect to MongoDB', err));
 
 // Route for the Home Page
@@ -59,6 +61,8 @@ app.get('/', (req, res) => {
 });
 
 // Modularized routes
+app.use(passport.initialize());
+app.use(passport.session());
 app.use('/auth', authRoutes); // Authentication routes
 app.use('/resume', resumeRoutes); // Resume routes
 app.use('/profile', profileRoutes); // Profile routes

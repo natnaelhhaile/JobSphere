@@ -1,8 +1,9 @@
 const express = require('express');
+const passport = require('passport');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const config = require('../utils/config'); // Centralized configuration
+const config = require('../config/configEnv'); // Centralized configuration
 const { authMiddleware } = require('../utils/authUtils');
 const { generateVerificationToken, sendVerificationEmail } = require('../utils/verificationUtils');
 
@@ -76,6 +77,17 @@ router.get('/logout', authMiddleware, (req, res) => {
     res.clearCookie('token');
     req.flash('success_msg', 'Logged out successfully!');
     return res.redirect('/');
+});
+
+// Social login routes
+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
+router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/auth/login' }), (req, res) => {
+    res.redirect('/dashboard');
+});
+
+router.get('/facebook', passport.authenticate('facebook', { scope: ['email'] }));
+router.get('/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/auth/login' }), (req, res) => {
+    res.redirect('/dashboard');
 });
 
 module.exports = router;

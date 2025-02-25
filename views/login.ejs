@@ -37,16 +37,26 @@
             <h2 class="my-4 text-center">Login to Your jobSphere<span>
                 </span> </h2>
             <form action="/auth/login" method="POST">
-                <div class="mb-3">
+                <div class="mb-2">
                     <label for="username" class="form-label">Username</label>
                     <input type="text" class="form-control" id="username" name="username" required>
                 </div>
-                <div class="mb-3">
+                <div class="mb-2">
                     <label for="password" class="form-label">Password</label>
                     <input type="password" class="form-control" id="password" name="password" required>
                 </div>
-                <div class="text-center my-5">
+                <div class="text-center my-4">
                     <button type="submit" class="btn btn-1 submit-button">Login</button>
+                </div>
+                <div class="social-logons text-center mb-5">
+                    <a href="/auth/google" class="btn btn-google">
+                        <i class="fa-brands fa-google"></i>
+                        Sign in with Google
+                    </a>
+                    <a href="/auth/facebook" class="btn btn-facebook">
+                        <i class="fa-brands fa-facebook"></i>
+                        Sign in with Facebook
+                    </a>
                 </div>
             </form>
             <p class="mt-3 text-center">Don't have an account? <a href="/auth/signup" class="btn btn-2">Sign up here!</a></p>
@@ -64,4 +74,27 @@
 
 
 
+
+<!-- 
+<script>
+    window.fbAsyncInit = function() {
+      FB.init({
+        appId      : '{your-app-id}',
+        cookie     : true,
+        xfbml      : true,
+        version    : '{api-version}'
+      });
+        
+      FB.AppEvents.logPageView();   
+        
+    };
+  
+    (function(d, s, id){
+       var js, fjs = d.getElementsByTagName(s)[0];
+       if (d.getElementById(id)) {return;}
+       js = d.createElement(s); js.id = id;
+       js.src = "https://connect.facebook.net/en_US/sdk.js";
+       fjs.parentNode.insertBefore(js, fjs);
+     }(document, 'script', 'facebook-jssdk'));
+  </script> -->
 

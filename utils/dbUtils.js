@@ -4,7 +4,7 @@ const axios = require('axios');
 const marked = require('marked');
 const { exec } = require('child_process');
 const Job = require('../models/Job');
-const config = require('../utils/config'); // Centralized configuration
+const config = require('../config/configEnv'); // Centralized configuration
 
 // Function to call Resume Parser API to upload and parse resume
 async function uploadResumeAndParse(filePath) {

@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const config = require('../utils/config'); // Centralized configuration
+const config = require('../config/configEnv'); // Centralized configuration
 
 // Authentication Middleware
 const authMiddleware = (req, res, next) => {
