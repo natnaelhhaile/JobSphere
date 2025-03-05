@@ -39,6 +39,7 @@ router.get('/', authMiddleware, async (req, res) => {
                 totalJobs: 0,
                 jobCounts: { linkedin: 0, indeed: 0, glassdoor: 0, zip_recruiter: 0, google: 0 },
                 currentPage: 1,
+                savedJobs: user.savedJobs
             });
         }
     } catch (error) {

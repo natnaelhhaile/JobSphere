@@ -30,7 +30,7 @@ const jobSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'User' 
     }
-});
+}, { timestamps: true });
 
 // Create the Job model based on the schema
 module.exports = mongoose.model('Job', jobSchema);

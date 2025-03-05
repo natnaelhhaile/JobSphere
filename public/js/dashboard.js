@@ -28,7 +28,8 @@ function renderJobs(filter, jobs, currentPage, totalJobs) {
             <div class="job-item mb-4" data-site="${job.site.toLowerCase()}">
                 <div class="job-card p-3">
                     <div class="d-flex align-items-center">
-                        <img src="${job.company_logo ? job.company_logo : '/images/default-logo.png'}" alt="${job.company} logo" class="job-logo">
+                        <img src="${job.company_logo ? job.company_logo : '/images/default-logo.png'}" 
+                        alt="${job.company} logo" class="job-logo">
                         <div class="ms-3">
                             <h5 class="job-title">${job.title}</h5>
                             <p><strong>${job.company}</strong></p>
@@ -43,7 +44,9 @@ function renderJobs(filter, jobs, currentPage, totalJobs) {
                     }</p>
                     <p class="remote-status"><strong>Remote:</strong> ${job.is_remote ? 'Yes' : 'No'}</p>
                     <div class="text-center">
+                        <button data-id="${job._id}" class="btn btn-1 bookmark-btn"><i class="fa-regular fa-bookmark"></i></button>
                         <a href="/dashboard/jobs/${job._id}" target="_blank" class="btn btn-1">View Job</a>
+                        <a href="${job.job_url}" target="_blank" class="btn btn-1">Apply</a>
                     </div>
                 </div>
             </div>`
@@ -128,7 +131,45 @@ async function fetchJobs(filter = 'all', page = 1) {
     }
 }
 
+// Toggle bookmark helper function
+async function toggleBookmark(jobId, button) {
+    try {
+        const response = await fetch('/api/bookmarks/toggle', {
+            method: 'POST',
+            headers: {'Content-Type': 'Application/JSON'},
+            body: JSON.stringify({jobId})
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            // toggle UI based on new bookmark status
+            if (result.saved) {
+                button.querySelector('i').classList.remove('fa-regular');
+                button.querySelector('i').classList.add('fa-solid');
+            } else {
+                button.querySelector('i').classList.remove('fa-solid');
+                button.querySelector('i').classList.add('fa-regular');
+            }
+        } else {
+            console.log("response not ok")
+            console.error('Failed to fetch jobs:', response.status, response.statusText);
+            return;
+        }
+    } catch (err) {
+        console.error('Error toggling bookmark:', err);
+    }
+}
+
 // Initialize page
 document.addEventListener('DOMContentLoaded', () => {
     fetchJobs();
+    // Event listener to all bookmark buttons - Event Delegation
+    document.addEventListener('click', async (event) => {
+        const button = event.target.closest('bookmark-btn');
+        if (button) {
+            event.preventDefault();
+            const jobId = button.dataset.id;
+            await toggleBookmark(jobId, button)
+        }
+    })
 });

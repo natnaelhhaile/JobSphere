@@ -38,9 +38,10 @@ passport.use(
             clientSecret: config.GOOGLE_CLIENT_SECRET,
             callbackURL: '/auth/google/callback'
         }, 
-        async (accessToken, refreshToken, profile, done) => {
+        async (req, accessToken, refreshToken, profile, done) => {
             // Find or create the user in your database
             try {
+                console.log('Google Profile:', profile);  // Debug profile data
                 // Check if the user already exists
                 const email = profile.emails[0].value;
                 let user = await User.findOne({ email });
@@ -74,8 +75,9 @@ passport.use(
             callbackURL: '/auth/facebook/callback',
             profileFields: ['id', 'emails', 'name']
         }, 
-        async (accessToken, refreshToken, profile, done) => {
+        async (req, accessToken, refreshToken, profile, done) => {
             try {
+                console.log('Facebook Profile:', profile);  // Debug profile data
                 // Check if the user already exists
                 const email = profile.emails[0].value;
                 let user = await User.findOne({ email });

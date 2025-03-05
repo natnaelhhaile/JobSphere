@@ -1,0 +1,91 @@
+/* General Styles */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f9f9f9;
+}
+
+/* Shared Container */
+.settings-container {
+    max-width: 800px;
+    margin: 50px auto;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Sidebar */
+.settings-sidebar {
+    width: 80px;
+    background: linear-gradient(to bottom, #f66, #f89);
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 50px;
+}
+.settings-sidebar a {
+    color: white;
+    font-size: 24px;
+    margin: 20px 0;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    transition: 0.3s;
+}
+.settings-sidebar a.active {
+    background: white;
+    color: #f66;
+}
+
+/* Form Elements */
+.settings-form-group {
+    margin-bottom: 15px;
+}
+.settings-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+/* Toggle Switch */
+.settings-switch {
+    position: relative;
+    width: 34px;
+    height: 20px;
+}
+.settings-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.settings-slider {
+    position: absolute;
+    background-color: #ccc;
+    transition: .4s;
+    border-radius: 34px;
+}
+.settings-slider:before {
+    content: "";
+    height: 14px;
+    width: 14px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%;
+}
+
+/* Save Button */
+.settings-save-btn {
+    background: linear-gradient(to right, #f66, #f89);
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+}

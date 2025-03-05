@@ -81,13 +81,60 @@ router.get('/logout', authMiddleware, (req, res) => {
 
 // Social login routes
 router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));
-router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/auth/login' }), (req, res) => {
-    res.redirect('/dashboard');
+// router.get('/google/callback', passport.authenticate('google', { failureRedirect: '/auth/login' }), (req, res) => {
+//     res.redirect('/dashboard');
+// });
+
+router.get('/google/callback', (req, res, next) => {
+    passport.authenticate('google', (err, user, info) => {
+        if (err) {
+            console.log('Google OAuth failed!');
+            console.error('Google OAuth error:', err);
+            return next(err);
+        }
+        if (!user) {
+            console.warn('Google OAuth failed:', info);
+            console.log('Google login failed!');
+            req.flash('error_msg', 'Google login failed!');
+            return res.redirect('/auth/login');
+        }
+        req.logIn(user, (loginErr) => {
+            if (loginErr) {
+                console.log('login failed!');
+                console.error('Login error:', loginErr);
+                return next(loginErr);
+            }
+            console.log(user);
+            return res.redirect('/dashboard');
+        });
+    })(req, res, next);
 });
 
 router.get('/facebook', passport.authenticate('facebook', { scope: ['email'] }));
-router.get('/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/auth/login' }), (req, res) => {
-    res.redirect('/dashboard');
+// router.get('/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/auth/login' }), (req, res) => {
+//     res.redirect('/dashboard');
+// });
+
+router.get('/facebook/callback', (req, res, next) => {
+    passport.authenticate('facebook', (err, user, info) => {
+        if (err) {
+            console.error('Facebook OAuth error:', err);
+            return next(err);
+        }
+        if (!user) {
+            console.warn('Facebook OAuth failed:', info);
+            req.flash('error_msg', 'Facebook login failed!');
+            return res.redirect('/auth/login');
+        }
+        req.logIn(user, (loginErr) => {
+            if (loginErr) {
+                console.error('Login error:', loginErr);
+                return next(loginErr);
+            }
+            console.log(user);
+            return res.redirect('/dashboard');
+        });
+    })(req, res, next);
 });
 
 module.exports = router;

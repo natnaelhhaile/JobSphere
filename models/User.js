@@ -38,7 +38,11 @@ const userSchema = new mongoose.Schema({
     phoneVerified: { type: Boolean, default: false },
     emailVerified: { type: Boolean, default: false },
     secondaryEmailVerified: { type: Boolean, default: false },
-});
+    savedJobs: [{ 
+        type: mongoose.Schema.Types.ObjectId, 
+        ref: 'Job' 
+    }] // Store only Job IDs
+}, { timestamps: true });
 
 // Create the User model based on the schema
 module.exports = mongoose.model('User', userSchema);
