@@ -9,6 +9,11 @@ const router = express.Router();
 
 // Main dashboard route
 router.get('/', authMiddleware, async (req, res) => {
+    // Validate userId
+    if (!mongoose.isValidObjectId(req.userId)) {
+        req.flash('error_msg', 'Invalid user ID');
+        return;
+    }
     const userId = new mongoose.Types.ObjectId(req.userId);
     try {
         const user = await User.findById(userId);
@@ -66,6 +71,13 @@ router.get('/jobs', authMiddleware, async (req, res) => {
     res.setHeader('Surrogate-Control', 'no-store');
 
     try {
+        // Validate userId
+        if (!mongoose.isValidObjectId(req.userId)) {
+            return res.status(400).json({ 
+                type: 'danger', 
+                message: "Invalid user ID" 
+            });
+        }
         const userId = new mongoose.Types.ObjectId(req.userId);
         const { site = 'all', page = 1 } = req.query;
 
@@ -75,13 +87,21 @@ router.get('/jobs', authMiddleware, async (req, res) => {
         return res.status(200).json({ jobs, totalJobs, jobCounts, currentPage });
     } catch (error) {
         console.error('Error fetching filtered jobs:', error);
-        return res.status(500).json({ message: 'Failed to fetch jobs' });
+        return res.status(500).json({ 
+            type: danger,
+            message: 'Failed to fetch jobs' 
+        });
     }
 });
 
 // View a single job post
 router.get('/jobs/:id', authMiddleware, async (req, res) => {
     try {
+        // Validate userId
+        if (!mongoose.isValidObjectId(req.userId)) {
+            req.flash('error_msg', 'Invalid user ID');
+            return;
+        }
         const jobId = new mongoose.Types.ObjectId(req.params.id);
         const job = await Job.findById(jobId);
 

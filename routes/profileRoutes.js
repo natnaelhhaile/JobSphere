@@ -13,6 +13,11 @@ const router = express.Router();
 // Route to profile page
 router.get('/', authMiddleware, async (req, res) => {
     try {
+        // Validate userId
+        if (!mongoose.isValidObjectId(req.userId)) {
+            req.flash('error_msg', 'Invalid user ID');
+            return;
+        }
         const userId = new mongoose.Types.ObjectId(req.userId);
         const user = await User.findById(userId);
 
@@ -40,9 +45,16 @@ router.get('/', authMiddleware, async (req, res) => {
 // Route to edit username
 router.post('/edit-username', authMiddleware, async (req, res) => {
     const { username } = req.body;
-    const userId = new mongoose.Types.ObjectId(req.userId);
-
+    
     try {
+        // Validate userId
+        if (!mongoose.isValidObjectId(req.userId)) {
+            return res.status(400).json({ 
+                type: 'danger', 
+                message: "Invalid user ID" 
+            });
+        }
+        const userId = new mongoose.Types.ObjectId(req.userId);
         const existingUser = await User.findOne({ username });
         if (existingUser) {
             return res.status(400).json({
@@ -69,13 +81,23 @@ router.post('/edit-username', authMiddleware, async (req, res) => {
 // Route to change password
 router.post('/change-password', authMiddleware, async (req, res) => {
     const { currentPassword, newPassword } = req.body;
-    const userId = new mongoose.Types.ObjectId(req.userId);
-
+    
     try {
+        // Validate userId
+        if (!mongoose.isValidObjectId(req.userId)) {
+            return res.status(400).json({ 
+                type: 'danger', 
+                message: "Invalid user ID" 
+            });
+        }
+        const userId = new mongoose.Types.ObjectId(req.userId);
         const user = await User.findById(userId);
 
         if (!(await bcrypt.compare(currentPassword, user.password))) {
-            return res.status(400).json({ type: 'danger', message: 'Current password is incorrect.' });
+            return res.status(400).json({ 
+                type: 'danger', 
+                message: 'Current password is incorrect.' 
+            });
         }
 
         if (await bcrypt.compare(newPassword, user.password)) {
@@ -89,19 +111,32 @@ router.post('/change-password', authMiddleware, async (req, res) => {
         user.password = hashedPassword;
         await user.save();
 
-        return res.status(200).json({ type: 'success', message: 'Password updated successfully!' });
+        return res.status(200).json({ 
+            type: 'success', 
+            message: 'Password updated successfully!' 
+        });
     } catch (err) {
         console.error('Error updating password:', err);
-        return res.status(500).json({ type: 'danger', message: 'Error updating password. Please try again.' });
+        return res.status(500).json({ 
+            type: 'danger', 
+            message: 'Error updating password. Please try again.' 
+        });
     }
 });
 
 // Route to add secondary email
 router.post('/add-email', authMiddleware, async (req, res) => {
     const { email } = req.body;
-    const userId = new mongoose.Types.ObjectId(req.userId);
-
+    
     try {
+        // Validate userId
+        if (!mongoose.isValidObjectId(req.userId)) {
+            return res.status(400).json({ 
+                type: 'danger', 
+                message: "Invalid user ID" 
+            });
+        }
+        const userId = new mongoose.Types.ObjectId(req.userId);
         const user = await User.findById(userId);
 
         if (user.email === email || user.secondaryEmail === email) {
@@ -184,10 +219,17 @@ router.post('/add-phone', authMiddleware, async (req, res) => {
 
 // Route to verify phone number
 router.post('/verify-phone', authMiddleware, async (req, res) => {
-    const userId = new mongoose.Types.ObjectId(req.userId);
     const { otp, token } = req.body;
-
+    
     try {
+        // Validate userId
+        if (!mongoose.isValidObjectId(req.userId)) {
+            return res.status(400).json({ 
+                type: 'danger', 
+                message: "Invalid user ID" 
+            });
+        }
+        const userId = new mongoose.Types.ObjectId(req.userId);
         const decoded = jwt.verify(token, config.JWT_SECRET);
         if (decoded.otp !== otp) {
             return res.status(400).json({
@@ -200,7 +242,10 @@ router.post('/verify-phone', authMiddleware, async (req, res) => {
         user.phoneNumber = decoded.phoneNumber;
         user.phoneVerified = true;
         await user.save();
-        return res.status(200).json({ type: 'success', message: 'Phone number verified successfully!' });
+        return res.status(200).json({ 
+            type: 'success', 
+            message: 'Phone number verified successfully!' 
+        });
     } catch (err) {
         console.error('Error verifying phone number:', err);
         return res.status(500).json({
@@ -212,10 +257,17 @@ router.post('/verify-phone', authMiddleware, async (req, res) => {
 
 // Route to delete account
 router.post('/delete-account', authMiddleware, async (req, res) => {
-    const userId = new mongoose.Types.ObjectId(req.userId);
     const { password } = req.body;
-
+    
     try {
+        // Validate userId
+        if (!mongoose.isValidObjectId(req.userId)) {
+            return res.status(400).json({ 
+                type: 'danger', 
+                message: "Invalid user ID" 
+            });
+        }
+        const userId = new mongoose.Types.ObjectId(req.userId);
         const user = await User.findById(userId);
         if (!user || !(await bcrypt.compare(password, user.password))) {
             return res.status(400).json({
@@ -233,7 +285,10 @@ router.post('/delete-account', authMiddleware, async (req, res) => {
             maxAge: 3600000,
         });
 
-        return res.status(200).json({ type: 'success', message: 'Account deleted successfully!' });
+        return res.status(200).json({ 
+            type: 'success', 
+            message: 'Account deleted successfully!' 
+        });
     } catch (err) {
         console.error('Error deleting account:', err);
         return res.status(500).json({

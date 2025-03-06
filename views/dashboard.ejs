@@ -12,11 +12,11 @@
 <body>
 
     <!-- Include Header -->
-    <%- include('header') %>
+    <%- include('partials/header') %>
     <div class="wrapper">
     
+        <!-- Express-flash messages -->
         <div class="alert-container">
-            <!-- Display success message -->
             <% if (success_msg) { %>
                 <div id="success-alert" class="alert alert-success alert-dismissible fade show" role="alert">
                     <%= success_msg %>
@@ -24,7 +24,6 @@
                 </div>
             <% } %>
         
-            <!-- Display error message -->
             <% if (error_msg) { %>
                 <div id="danger-alert" class="alert alert-danger alert-dismissible fade show" role="alert">
                     <%= error_msg %>
@@ -81,10 +80,9 @@
     </div>
 
     <!-- Include Footer -->
-    <%- include('footer') %>
+    <%- include('partials/footer') %>
 
     <!-- Link to your external JS file -->
     <script src="/js/dashboard.js"></script>
-    <script src="/js/script.js"></script>
 </body>
 </html>

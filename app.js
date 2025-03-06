@@ -15,6 +15,7 @@ const resumeRoutes = require('./routes/resumeRoutes');
 const phoneRoutes = require('./routes/phoneRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const bookmarkRoutes = require('./routes/bookmarkRoutes');
 
 // Middleware setup
 app.use(cookieParser());
@@ -52,7 +53,7 @@ app.use((req, res, next) => {
 
 // MongoDB connection
 mongoose.connect(config.MONGODB_URI)
-    .then(() => console.log('Connected to MongoDB'))
+    .then(() => console.log('Connected to MongoDB Atlas'))
     .catch(err => console.error('Failed to connect to MongoDB', err));
 
 // Route for the Home Page
@@ -68,6 +69,7 @@ app.use('/resume', resumeRoutes); // Resume routes
 app.use('/profile', profileRoutes); // Profile routes
 app.use('/api/phones', phoneRoutes); // Phone routes
 app.use('/dashboard', dashboardRoutes); // Dashboard routes
+app.use('/bookmarks', bookmarkRoutes); // Bookmark routes
 
 // app.get("/:page", (req, res) => {
 //     res.render(req.params.page, { activePage: req.params.page });

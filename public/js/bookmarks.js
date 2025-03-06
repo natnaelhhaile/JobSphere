@@ -14,29 +14,6 @@ function fixUnclosedTags(description) {
     }
 }
 
-// Filter jobs when a button is clicked
-function filterJobs(site) {
-    currentPage = 1; // Reset to the first page
-    
-    const filterButtons = document.querySelectorAll('.job-filter.btn');
-    if (!filterButtons) {
-        console.error('No filter buttons found.');
-        return;
-    }
-
-    // Batch DOM updates for better performance
-    requestAnimationFrame(() => {
-        filterButtons.forEach(btn => btn.classList.remove('active-filter'));
-        const selectedButton = document.querySelector(`.btn-${site}`);
-        if (selectedButton) {
-            selectedButton.classList.add('active-filter'); // Highlight the selected button
-        } else {
-            console.warn(`Filter button for '${site}' not found.`);
-        }
-    });
-    fetchJobs(site, currentPage); // Re-render jobs
-}
-
 // Function to render pagination
 function renderPagination(filter, totalJobs, currentPage) {
     const paginationContainer = document.querySelector('.pagination-container');
@@ -57,7 +34,7 @@ function renderPagination(filter, totalJobs, currentPage) {
 }
 
 // Function to render jobs based on the current filter and page
-function renderJobs(filter, jobs, currentPage, totalJobs) {
+function renderJobs(jobs, currentPage, totalJobs) {
     const jobsList = document.getElementById('jobs-list');
     const noJobsMsg = document.getElementById('no-jobs-msg');
     const paginationContainer = document.querySelector('.pagination-container');
@@ -114,11 +91,11 @@ function renderJobs(filter, jobs, currentPage, totalJobs) {
     jobsList.appendChild(fragment); // Append all elements at once for better performance
 
     // Render pagination
-    renderPagination(filter, totalJobs, currentPage);
+    renderPagination(totalJobs, currentPage);
 }
 
 // Function to fetch jobs
-async function fetchJobs(filter = 'all', page = 1) {
+async function fetchJobs(jobs) {
     const loadingOverlay = document.getElementById('loading-overlay');
     if (!loadingOverlay) {
         console.error("Loading overlay element not found");
@@ -129,39 +106,26 @@ async function fetchJobs(filter = 'all', page = 1) {
         // Show loading overlay
         loadingOverlay.style.display = 'flex';
 
-        const url = `/dashboard/jobs?site=${filter}&page=${page}`;
+        const url = '/bookmarks';
         const response = await fetch(url, {
-             credentials: 'include',
-             headers: {
-                'Cache-Control': 'no-cache', // Prevent caching
-                'Pragma': 'no-cache',
-            }
+            method: 'POST',
+            headers: {'Content-Type': 'Application/JSON'},
         });
 
         // Check for errors in the API response
         if (!response.ok) {
             throw new Error(`Failed to fetch jobs: ${response.status} ${response.statusText}`);
         }
-        
-        // option - 1
-        // // Ensure response isn't empty before parsing
-        // const text = await response.text();
-        // if (!text) {
-            //     throw new Error('Empty response received from server');
-            // }
-            
-            // const data = JSON.parse(text); // Explicitly parse text
-            
-        // option - 2
+
         const contentType = response.headers.get("content-type");
 
-        if (contentType && contentType.includes("Application/JSON")) {
+        if (contentType && contentType.includes("application/json")) {
             const data = response.JSON();
 
             if (data.jobs && Array.isArray(data.jobs)) {
                 currentPage = page
                 // Render fetched jobs
-                renderJobs(filter, data.jobs, currentPage, data.totalJobs);
+                renderJobs(data.jobs, currentPage, data.jobs.length);
             } else {
                 const jobsList = document.getElementById('jobs-list');
                 jobsList.innerHTML = '<p>No jobs found.</p>';
@@ -177,72 +141,9 @@ async function fetchJobs(filter = 'all', page = 1) {
     }
 }
 
-// Function to process flash alerts
-function processFlashAlert(alertElement) {
-    if (!alertElement || !alertElement.textContent.trim()) {
-        if (alertElement) alertElement.style.display = 'none';
-        return;
-    }
-    alertElement.style.display = 'block';
-    fadeOutAlert(alertElement);
-}
-
-// Function to handle fade-out and removal of alert
-function fadeOutAlert(alertElement) {
-    if (!alertElement) return;
-
-    alertElement.classList.add('fade-out'); // Start the animation
-
-    alertElement.addEventListener('animationend', () => {
-        alertElement.style.display = 'none';
-    }, { once: true }); // Ensures it runs only once
-}
-
-// Toggle bookmark helper function
-async function toggleBookmark(jobId, button) {
-    try {
-        const response = await fetch('/bookmarks/toggle', {
-            method: 'POST',
-            headers: {'Content-Type': 'Application/JSON'},
-            body: JSON.stringify({jobId})
-        });
-
-        if (!response.ok) {
-            throw new Error(`Failed to bookmark/unbookmark job: ${response.status} ${response.statusText}`);
-        }
-
-        const result = await response.json();
-
-            // toggle UI based on new bookmark status
-            const icon = button.querySelector('i');
-            if (result.saved) {
-                icon.classList.replace('fa-regular', 'fa-solid');
-            } else {
-                icon.classList.replace('fa-solid', 'fa-regular');
-            }
-    } catch (err) {
-        console.error('Error toggling bookmark:', err);
-        // Todo: redesign #flash-messages to show error or success messages on the dashboard page without Express-flash
-    }
-}
-
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
 
     // Render jobs
     await fetchJobs();
-
-    // Express-flash message handles
-    processFlashAlert(document.querySelector('.alert-success'));
-    processFlashAlert(document.querySelector('.alert-danger'));
-
-    // Event listener to all bookmark buttons - Event Delegation
-    document.addEventListener('click', async (event) => {
-        const button = event.target.closest('.bookmark-btn');
-        if (button) {
-            event.preventDefault();
-            const jobId = button.dataset.id;
-            await toggleBookmark(jobId, button)
-        }
-    })
 });
