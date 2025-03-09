@@ -154,7 +154,7 @@ async function getStoredJobs(filter, page) {
 
         // Calculate job counts for each site
         const jobCounts = await Job.aggregate([
-            { $match: filter }, // Match jobs with the filter
+            { $match: { user: filter.user } }, // Match jobs with the filter
             { $group: { _id: "$site", count: { $sum: 1 } } },
         ]);
 

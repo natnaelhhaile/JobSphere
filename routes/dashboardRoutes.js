@@ -9,55 +9,7 @@ const router = express.Router();
 
 // Main dashboard route
 router.get('/', authMiddleware, async (req, res) => {
-    // Validate userId
-    if (!mongoose.isValidObjectId(req.userId)) {
-        req.flash('error_msg', 'Invalid user ID');
-        return;
-    }
-    const userId = new mongoose.Types.ObjectId(req.userId);
-    try {
-        const user = await User.findById(userId);
-
-        const hasResume =
-            user &&
-            (user.resume.skills.length > 0 ||
-                user.resume.education.length > 0 ||
-                user.resume.experience.length > 0);
-
-        const page = 1;
-        const filter = { user: userId };
-
-        // Fetch stored jobs
-        const { jobs, totalJobs, jobCounts, currentPage } = await getStoredJobs(filter, page);
-
-        if (jobs && jobs.length > 0) {
-            return res.render('dashboard', { jobs, totalJobs, jobCounts, currentPage });
-        } else if (hasResume) {
-            // Scrape jobs if the user has a resume but no stored jobs
-            await searchJobsFromResume(user.resume, userId);
-            const { jobs, totalJobs, jobCounts, currentPage } = await getStoredJobs(filter, page);
-            return res.render('dashboard', { jobs, totalJobs, jobCounts, currentPage });
-        } else {
-            // Render an empty dashboard
-            return res.render('dashboard', {
-                jobs: [],
-                totalJobs: 0,
-                jobCounts: { linkedin: 0, indeed: 0, glassdoor: 0, zip_recruiter: 0, google: 0 },
-                currentPage: 1,
-                savedJobs: user.savedJobs
-            });
-        }
-    } catch (error) {
-        req.flash('error_msg', 'An error occurred while loading your dashboard');
-        console.error(error);
-        return res.render('dashboard', {
-            jobs: [],
-            totalJobs: 0,
-            jobCounts: { linkedin: 0, indeed: 0, glassdoor: 0, zip_recruiter: 0, google: 0 },
-            currentPage: 1,
-            savedJobs: []
-        });
-    }
+    return res.render('dashboard');
 });
 
 // Fetch jobs dynamically for filtering and pagination
@@ -81,17 +33,49 @@ router.get('/jobs', authMiddleware, async (req, res) => {
         }
         const userId = new mongoose.Types.ObjectId(req.userId);
         const user = await User.findById(userId);
+
+        const hasResume =
+        user &&
+        (user.resume.skills.length > 0 ||
+            user.resume.education.length > 0 ||
+            user.resume.experience.length > 0);
+
         const { site = 'all', page = 1 } = req.query;
-
         const filter = site === 'all' ? { user: userId } : { user: userId, site };
-        const { jobs, totalJobs, jobCounts, currentPage } = await getStoredJobs(filter, page);
 
-        return res.status(200).json({ jobs, totalJobs, jobCounts, currentPage, savedJobs: user.savedJobs });
+        // Fetch stored jobs
+        const { jobs, totalJobs, jobCounts, currentPage } = await getStoredJobs(filter, page);
+        if (jobs && totalJobs > 0 && jobCounts) {
+            return res.status(200).json({ jobs, totalJobs, jobCounts, currentPage, savedJobs: user.savedJobs });
+        } else if (hasResume) {
+            // Scrape jobs if the user has a resume but no stored jobs
+            await searchJobsFromResume(user.resume, userId);
+            // Fetch stored jobs
+            const { jobs, totalJobs, jobCounts, currentPage } = await getStoredJobs(filter, page);
+            return res.status(200).json({ jobs, totalJobs, jobCounts, currentPage, savedJobs: user.savedJobs });
+        } else {
+            return res.status(200).json({
+                type: 'danger',
+                message: 'No resume data found!',
+                jobs, totalJobs, jobCounts, currentPage, savedJobs: [] 
+            });
+        }
     } catch (error) {
         console.error('Error fetching filtered jobs:', error);
         return res.status(500).json({ 
             type: danger,
-            message: 'Failed to fetch jobs' 
+            message: 'Failed to fetch jobs',
+            jobs: [],
+            totalJobs: 0,
+            jobCounts: {
+                linkedin: 0,
+                indeed: 0,
+                glassdoor: 0,
+                ziprecruiter: 0,
+                google: 0,
+            },
+            currentPage: 1,
+            savedJobs: [] 
         });
     }
 });

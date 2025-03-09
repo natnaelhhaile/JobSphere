@@ -53,7 +53,7 @@ function renderJobs(jobs, currentPage, totalJobs, savedJobs) {
     }
 
     jobsList.innerHTML = ''; // Clear previous content
-    bookmarkNumbersHeader.innerHTML = savedJobs.length;
+    bookmarkNumbersHeader.textContent = savedJobs.length;
     noJobsMsg.style.display = 'none';
 
     const fragment = document.createDocumentFragment();
@@ -97,14 +97,18 @@ function renderJobs(jobs, currentPage, totalJobs, savedJobs) {
     jobsList.appendChild(fragment); // Append all elements at once for better performance
 
     // Render pagination
-    renderPagination(totalJobs, currentPage);
+    renderPagination(savedJobs.length, currentPage);
 }
 // Function that executes if an api returns unexpected data
-function wrongFormatNoData() {
-    console.log('jobs is not an array')
+function wrongFormatNoData(jobsList) {
+    if (!jobsList) {
+        console.error("jobsList element not found.");
+        return;
+    }
+
+    console.log('jobs is not an array');
     jobsList.innerHTML = '<p>No jobs found.</p>';
     document.querySelector('.pagination-container').innerHTML = '';
-    return;
 }
 
 // Function to fetch jobs
@@ -116,52 +120,53 @@ async function fetchJobs(currentPage = 1) {
         return;
     }
     try {
+        loadingOverlay.style.display = 'flex'; // Show loading overlay
 
-        // Show loading overlay
-        loadingOverlay.style.display = 'flex';
-
-        const url = `/bookmarks?page=${currentPage}`;
+        const url = `/bookmarks/jobs?page=${currentPage}`;
         const response = await fetch(url, {
             credentials: 'include',
             headers: {
-                'Cache-Control': 'no-cache', // Prevent caching
+                'Cache-Control': 'no-cache',
                 'Pragma': 'no-cache',
             }
         });
-        console.log(response);
-        // Check for errors in the API response
+
         if (!response.ok) {
             throw new Error(`Failed to fetch jobs: ${response.status} ${response.statusText}`);
         }
 
-        console.log(jobs);
-        console.log(jobs.length);
-        console.log(currentPage);
+        const result = await response.json();
 
-        // Validate response before calling fetchJobs
-        if (!window.jobs || !Array.isArray(window.jobs)) {
+        // Ensuring the values of the json aren't empty or undefined
+        if (!result.jobs || !Array.isArray(result.jobs)) {
             console.warn('Invalid or missing jobs data in response.');
-            wrongFormatNoData();
+            wrongFormatNoData(jobsList);
+            return;
         }
-        if (!window.savedJobs || !Array.isArray(window.savedJobs)) {
+        if (!result.savedJobs || !Array.isArray(result.savedJobs)) {
             console.warn('Invalid or missing savedJobs data in response.');
-            wrongFormatNoData();
+            wrongFormatNoData(jobsList);
+            return;
         }
-        if (!window.currentPage || typeof window.currentPage !== 'number') {
+        if (!result.currentPage || typeof result.currentPage !== 'number') {
             console.warn('Invalid or missing currentPage data in response.');
-            wrongFormatNoData();
+            wrongFormatNoData(jobsList);
+            return;
+        }        
+        if (!result.totalJobs || typeof result.totalJobs !== 'number') {
+            console.warn('Invalid or missing totalJobs data in response.');
+            wrongFormatNoData(jobsList);
+            return;
         }
 
-        // Render fetched jobs
-        console.log('jobs is an array')
-        renderJobs(window.jobs, currentPage, window.savedJobs.length, window.savedJobs);
+        // rendering jobs
+        renderJobs(result.jobs, result.currentPage, result.savedJobs.length, result.savedJobs);
 
     } catch (err) {
         console.error('Error fetching jobs:', err);
         jobsList.innerHTML = `<p style="color: red;">${err.message || "An unexpected error occurred. Please try again later."}</p>`;
     } finally {
-        // Hide loading overlay
-        loadingOverlay.style.display = 'none';
+        loadingOverlay.style.display = 'none'; // Hide loading overlay
     }
 }
 
@@ -223,8 +228,12 @@ async function toggleBookmark(jobId, button) {
             return;
         }
 
+        // ✅ Fetch the current active pagination button
+        const activePageButton = document.querySelector('.pagination-btn[aria-current="page"]');
+        const currentPage = activePageButton ? parseInt(activePageButton.textContent, 10) : result.currentPage;
+
         // Fetch updated job list
-        await fetchJobs(result.currentPage);
+        await fetchJobs(currentPage || result.currentPage);
 
     } catch (err) {
         console.error('Error toggling bookmark:', err);
@@ -254,7 +263,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     not have loaded yet and hence avoids the need to refresh the page to see
     jobs */
     if (window.location.pathname === "/bookmarks") {
-        await fetchJobs(window.currentPage);
+        await fetchJobs();
     }
 
     // Express-flash message handles

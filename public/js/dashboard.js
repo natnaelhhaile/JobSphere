@@ -35,6 +35,28 @@ function filterJobs(site) {
     fetchJobs(site, currentPage); // Re-render jobs
 }
 
+function updateFilterButtons(jobCounts) {
+    // Loop through job count keys and update only the count inside the button
+    Object.keys(jobCounts).forEach(site => {
+        const button = document.querySelector(`.btn-${site}`);
+        if (button) {
+            let countElement = button.querySelector('.site-count');
+            if (!countElement) {
+                console.warn(`Count element for '${site}' not found inside button.`);
+                return;
+            }
+            // Find the count and update it
+            countElement.textContent = ` (${jobCounts[site] || 0})`;
+        } else {
+            console.warn(`Filter button for '${site}' not found.`);
+        }
+    });
+
+    const totalCount = Object.values(jobCounts).reduce((total, count) => total + count, 0);
+    document.querySelector('.btn-all .site-count').textContent = ` (${totalCount})`;
+}
+
+
 // Function to render pagination
 function renderPagination(filter, totalJobs, currentPage) {
     const jobsPerPage = 8; // Jobs per page
@@ -56,7 +78,7 @@ function renderPagination(filter, totalJobs, currentPage) {
 }
 
 // Function to render jobs based on the current filter and page
-function renderJobs(filter, jobs, currentPage, totalJobs, savedJobs) {
+function renderJobs(filter, jobs, currentPage, totalJobs, savedJobs, jobCounts) {
     const jobsList = document.getElementById('jobs-list');
     const noJobsMsg = document.getElementById('no-jobs-msg');
     const paginationContainer = document.querySelector('.pagination-container');
@@ -114,6 +136,9 @@ function renderJobs(filter, jobs, currentPage, totalJobs, savedJobs) {
 
     jobsList.appendChild(fragment); // Append all elements at once for better performance
 
+    // Render filter buttons
+    updateFilterButtons(jobCounts);
+
     // Render pagination
     renderPagination(filter, totalJobs, currentPage);
 }
@@ -150,7 +175,7 @@ async function fetchJobs(filter = 'all', page = 1) {
         if (data.jobs && Array.isArray(data.jobs)) {
             currentPage = page
             // Render fetched jobs
-            renderJobs(filter, data.jobs, currentPage, data.totalJobs, data.savedJobs);
+            renderJobs(filter, data.jobs, currentPage, data.totalJobs, data.savedJobs, data.jobCounts);
         } else {
             jobsList.innerHTML = '<p>No jobs found.</p>';
             document.querySelector('.pagination-container').innerHTML = '';

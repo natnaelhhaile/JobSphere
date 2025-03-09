@@ -39,22 +39,22 @@
             <!-- Filter buttons -->
             <div class="job-filter btn-group mt-3 ms-auto" style="float: right;">
                 <button class="btn btn-all" onclick="filterJobs('all')">
-                    All (<%= totalJobs %>)
+                    All <span class="site-count"></span>
                 </button>
                 <button class="btn btn-linkedin" onclick="filterJobs('linkedin')">
-                    <i class="fab fa-linkedin"></i> LinkedIn (<%= jobCounts.linkedin %>)
+                    <i class="fab fa-linkedin"></i> LinkedIn <span class="site-count"></span>
                 </button>
                 <button class="btn btn-indeed" onclick="filterJobs('indeed')">
-                    <img src="/images/icons/indeed.png" alt="Indeed" class="icon"> Indeed (<%= jobCounts.indeed %>)
+                    <img src="/images/icons/indeed.png" alt="Indeed" class="icon"> Indeed <span class="site-count"></span>
                 </button>
                 <button class="btn btn-glassdoor" onclick="filterJobs('glassdoor')">
-                    <img src="/images/icons/glassdoor.png" alt="Glassdoor" class="icon"> Glassdoor (<%= jobCounts.glassdoor %>)
+                    <img src="/images/icons/glassdoor.png" alt="Glassdoor" class="icon"> Glassdoor <span class="site-count"></span>
                 </button>
                 <button class="btn btn-zip_recruiter" onclick="filterJobs('zip_recruiter')">
-                    ZipRecruiter (<%= jobCounts.zip_recruiter %>)
+                    ZipRecruiter <span class="site-count"></span>
                 </button>
                 <button class="btn btn-google" onclick="filterJobs('google')">
-                    <i class="fab fa-google"></i> Google (<%= jobCounts.google %>)
+                    <i class="fab fa-google"></i> Google <span class="site-count"></span>
                 </button>
             </div>
         </div>

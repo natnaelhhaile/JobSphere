@@ -37,9 +37,7 @@
     
         <div class="container jobs-container"> 
             <h2>Your Bookmarked Jobs: 
-                <span class="bookmark-numbers">
-                    <%= savedJobs.length %>
-                </span>
+                <span class="bookmark-numbers"></span>
              </h2>
             <div id="jobs-list" class="row mx-auto">
                 <!-- Job cards will be dynamically rendered here -->
@@ -66,14 +64,6 @@
 
     <!-- Link to your external JS file -->
     <script src="/js/bookmarks.js"></script>
-    <script>
-        // Embed server-rendered EJS values into JavaScript variables
-        window.jobs = <%- JSON.stringify(jobs) %>;
-        window.currentPage = <%= currentPage %>;
-        window.savedJobs = <%- JSON.stringify(savedJobs) %>;
-    
-        // Now you can manipulate `jobs` dynamically
-    </script>
     
 </body>
 </html>
