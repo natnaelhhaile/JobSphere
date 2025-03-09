@@ -53,7 +53,7 @@ app.use((req, res, next) => {
 
 // MongoDB connection
 mongoose.connect(config.MONGODB_URI)
-    .then(() => console.log('Connected to MongoDB Atlas'))
+    .then(() => console.log('Connected to MongoDB'))
     .catch(err => console.error('Failed to connect to MongoDB', err));
 
 // Route for the Home Page

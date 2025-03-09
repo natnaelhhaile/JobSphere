@@ -55,6 +55,7 @@ router.get('/', authMiddleware, async (req, res) => {
             totalJobs: 0,
             jobCounts: { linkedin: 0, indeed: 0, glassdoor: 0, zip_recruiter: 0, google: 0 },
             currentPage: 1,
+            savedJobs: []
         });
     }
 });
@@ -79,12 +80,13 @@ router.get('/jobs', authMiddleware, async (req, res) => {
             });
         }
         const userId = new mongoose.Types.ObjectId(req.userId);
+        const user = await User.findById(userId);
         const { site = 'all', page = 1 } = req.query;
 
         const filter = site === 'all' ? { user: userId } : { user: userId, site };
         const { jobs, totalJobs, jobCounts, currentPage } = await getStoredJobs(filter, page);
 
-        return res.status(200).json({ jobs, totalJobs, jobCounts, currentPage });
+        return res.status(200).json({ jobs, totalJobs, jobCounts, currentPage, savedJobs: user.savedJobs });
     } catch (error) {
         console.error('Error fetching filtered jobs:', error);
         return res.status(500).json({ 

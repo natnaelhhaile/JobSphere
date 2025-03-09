@@ -147,7 +147,8 @@ async function getStoredJobs(filter, page) {
         const jobsPerPage = 8;
         const jobs = await Job.find(filter)
             .skip((page - 1) * jobsPerPage)
-            .limit(jobsPerPage);
+            .limit(jobsPerPage)
+            .exec();
         const totalJobs = await Job.countDocuments(filter);
         console.log(totalJobs);
 

@@ -1,5 +1,3 @@
-const jobsPerPage = 8; // Jobs per page
-
 function fixUnclosedTags(description) {
     // Handle empty/non-string input
     if (typeof(description) !== 'string' || !description.trim()) return '';
@@ -15,7 +13,8 @@ function fixUnclosedTags(description) {
 }
 
 // Function to render pagination
-function renderPagination(filter, totalJobs, currentPage) {
+function renderPagination(totalJobs, currentPage) {
+    const jobsPerPage = 8; // Jobs per page
     const paginationContainer = document.querySelector('.pagination-container');
     paginationContainer.innerHTML = '';
     const totalPages = Math.ceil(totalJobs / jobsPerPage);
@@ -28,30 +27,33 @@ function renderPagination(filter, totalJobs, currentPage) {
             button.setAttribute('aria-current', 'page'); // Accessibility enhancement
         }
         button.textContent = i;
-        button.onclick = () => fetchJobs(filter, i); // Re-render jobs
+        button.onclick = () => fetchJobs(i); // Re-render jobs
         paginationContainer.appendChild(button);
     }
 }
 
 // Function to render jobs based on the current filter and page
-function renderJobs(jobs, currentPage, totalJobs) {
+function renderJobs(jobs, currentPage, totalJobs, savedJobs) {
     const jobsList = document.getElementById('jobs-list');
     const noJobsMsg = document.getElementById('no-jobs-msg');
     const paginationContainer = document.querySelector('.pagination-container');
+    const bookmarkNumbersHeader = document.querySelector('.bookmark-numbers');
 
     if (!jobsList || !noJobsMsg || !paginationContainer) {
         console.error("One or more required elements not found.");
         return;
     }
 
-    if (totalJobs === 0 || jobs.length === 0) {
+    if (totalJobs === 0 || jobs.length === 0 || savedJobs === 0) {
         jobsList.innerHTML = '';
         paginationContainer.innerHTML = '';
+        bookmarkNumbersHeader.innerHTML = '0';
         noJobsMsg.style.display = 'block';
         return;
     }
 
     jobsList.innerHTML = ''; // Clear previous content
+    bookmarkNumbersHeader.innerHTML = savedJobs.length;
     noJobsMsg.style.display = 'none';
 
     const fragment = document.createDocumentFragment();
@@ -79,7 +81,11 @@ function renderJobs(jobs, currentPage, totalJobs) {
                 }</p>
                 <p class="remote-status"><strong>Remote:</strong> ${job.is_remote ? 'Yes' : 'No'}</p>
                 <div class="text-center">
-                    <button data-id="${job._id}" class="btn btn-1 bookmark-btn"><i class="fa-regular fa-bookmark"></i></button>
+                    <button data-id="${job._id}" class="btn btn-1 bookmark-btn"><i class="${
+                        (savedJobs && Array.isArray(savedJobs)) ?
+                        (savedJobs.includes(job._id) ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark') :
+                        'fa-regular fa-bookmark'
+                    }"></i></button>
                     <a href="/dashboard/jobs/${job._id}" target="_blank" class="btn btn-1">View Job</a>
                     <a href="${job.job_url}" target="_blank" class="btn btn-1">Apply</a>
                 </div>
@@ -93,9 +99,17 @@ function renderJobs(jobs, currentPage, totalJobs) {
     // Render pagination
     renderPagination(totalJobs, currentPage);
 }
+// Function that executes if an api returns unexpected data
+function wrongFormatNoData() {
+    console.log('jobs is not an array')
+    jobsList.innerHTML = '<p>No jobs found.</p>';
+    document.querySelector('.pagination-container').innerHTML = '';
+    return;
+}
 
 // Function to fetch jobs
-async function fetchJobs(jobs) {
+async function fetchJobs(currentPage = 1) {
+    const jobsList = document.getElementById('jobs-list');
     const loadingOverlay = document.getElementById('loading-overlay');
     if (!loadingOverlay) {
         console.error("Loading overlay element not found");
@@ -106,32 +120,42 @@ async function fetchJobs(jobs) {
         // Show loading overlay
         loadingOverlay.style.display = 'flex';
 
-        const url = '/bookmarks';
+        const url = `/bookmarks?page=${currentPage}`;
         const response = await fetch(url, {
-            method: 'POST',
-            headers: {'Content-Type': 'Application/JSON'},
+            credentials: 'include',
+            headers: {
+                'Cache-Control': 'no-cache', // Prevent caching
+                'Pragma': 'no-cache',
+            }
         });
-
+        console.log(response);
         // Check for errors in the API response
         if (!response.ok) {
             throw new Error(`Failed to fetch jobs: ${response.status} ${response.statusText}`);
         }
 
-        const contentType = response.headers.get("content-type");
+        console.log(jobs);
+        console.log(jobs.length);
+        console.log(currentPage);
 
-        if (contentType && contentType.includes("application/json")) {
-            const data = response.JSON();
-
-            if (data.jobs && Array.isArray(data.jobs)) {
-                currentPage = page
-                // Render fetched jobs
-                renderJobs(data.jobs, currentPage, data.jobs.length);
-            } else {
-                const jobsList = document.getElementById('jobs-list');
-                jobsList.innerHTML = '<p>No jobs found.</p>';
-                document.querySelector('.pagination-container').innerHTML = '';
-            }
+        // Validate response before calling fetchJobs
+        if (!window.jobs || !Array.isArray(window.jobs)) {
+            console.warn('Invalid or missing jobs data in response.');
+            wrongFormatNoData();
         }
+        if (!window.savedJobs || !Array.isArray(window.savedJobs)) {
+            console.warn('Invalid or missing savedJobs data in response.');
+            wrongFormatNoData();
+        }
+        if (!window.currentPage || typeof window.currentPage !== 'number') {
+            console.warn('Invalid or missing currentPage data in response.');
+            wrongFormatNoData();
+        }
+
+        // Render fetched jobs
+        console.log('jobs is an array')
+        renderJobs(window.jobs, currentPage, window.savedJobs.length, window.savedJobs);
+
     } catch (err) {
         console.error('Error fetching jobs:', err);
         jobsList.innerHTML = `<p style="color: red;">${err.message || "An unexpected error occurred. Please try again later."}</p>`;
@@ -141,9 +165,109 @@ async function fetchJobs(jobs) {
     }
 }
 
+// Function to process flash alerts
+function processFlashAlert(alertElement) {
+    if (!alertElement || !alertElement.textContent.trim()) {
+        if (alertElement) alertElement.style.display = 'none';
+        return;
+    }
+    alertElement.style.display = 'block';
+    fadeOutAlert(alertElement);
+}
+
+// Function to handle fade-out and removal of alert
+function fadeOutAlert(alertElement) {
+    if (!alertElement) return;
+
+    alertElement.classList.add('fade-out'); // Start the animation
+
+    alertElement.addEventListener('animationend', () => {
+        alertElement.style.display = 'none';
+    }, { once: true }); // Ensures it runs only once
+}
+
+// Toggle bookmark helper function
+async function toggleBookmark(jobId, button) {
+    try {
+        const response = await fetch('/bookmarks/toggle', {
+            method: 'POST',
+            headers: {'Content-Type': 'Application/JSON'},
+            body: JSON.stringify({jobId})
+        });
+
+        if (!response.ok) {
+            throw new Error(`Failed to bookmark/unbookmark job: ${response.status} ${response.statusText}`);
+        }
+
+        const result = await response.json();
+
+        // toggle UI based on new bookmark status
+        const icon = button.querySelector('i');
+        if (result.saved) {
+            icon.classList.replace('fa-regular', 'fa-solid');
+        } else {
+            icon.classList.replace('fa-solid', 'fa-regular');
+        }
+
+        // Validate response before calling fetchJobs
+        if (!result.jobs || !Array.isArray(result.jobs)) {
+            console.warn('Invalid or missing jobs data in response.');
+            return;
+        }
+        if (!result.savedJobs || !Array.isArray(result.savedJobs)) {
+            console.warn('Invalid or missing savedJobs data in response.');
+            return;
+        }
+        if (!result.currentPage || typeof result.currentPage !== 'number') {
+            console.warn('Invalid or missing currentPage data in response.');
+            return;
+        }
+
+        // Fetch updated job list
+        await fetchJobs(result.currentPage);
+
+    } catch (err) {
+        console.error('Error toggling bookmark:', err);
+        // Todo: redesign #flash-messages to show error or success messages on the dashboard page without Express-flash
+    }
+}
+
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
 
-    // Render jobs
-    await fetchJobs();
+    document.addEventListener('click', (event) => {
+        // Ensure event.target is a valid DOM element
+        if (!(event.target instanceof Element)) return;
+
+        // Ignore clicks inside elements with class "profile-logout"
+        if (event.target.closest('.profile-logout a')) {
+            console.log("Profile or Logout clicked. Skipping event.");
+            return; // Do nothing
+        }
+
+        // Other click event logic here
+        console.log("Clicked outside profile-logout");
+    });
+
+    /* Check if user's on bookmarks page -- this condition force-executes 
+    fetchJobs() when navigating back from other pages as DOM elements might
+    not have loaded yet and hence avoids the need to refresh the page to see
+    jobs */
+    if (window.location.pathname === "/bookmarks") {
+        await fetchJobs(window.currentPage);
+    }
+
+    // Express-flash message handles
+    processFlashAlert(document.querySelector('.alert-success'));
+    processFlashAlert(document.querySelector('.alert-danger'));
+
+    // Event listener to all bookmark buttons - Event Delegation
+    document.addEventListener('click', async (event) => {
+        const button = event.target.closest('.bookmark-btn');
+        if (button) {
+            event.preventDefault();
+            const jobId = button.dataset.id;
+            await toggleBookmark(jobId, button)
+        }
+    });
 });

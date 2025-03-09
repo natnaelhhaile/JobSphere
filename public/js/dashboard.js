@@ -1,5 +1,3 @@
-const jobsPerPage = 8; // Jobs per page
-
 function fixUnclosedTags(description) {
     // Handle empty/non-string input
     if (typeof(description) !== 'string' || !description.trim()) return '';
@@ -39,6 +37,7 @@ function filterJobs(site) {
 
 // Function to render pagination
 function renderPagination(filter, totalJobs, currentPage) {
+    const jobsPerPage = 8; // Jobs per page
     const paginationContainer = document.querySelector('.pagination-container');
     paginationContainer.innerHTML = '';
     const totalPages = Math.ceil(totalJobs / jobsPerPage);
@@ -57,7 +56,7 @@ function renderPagination(filter, totalJobs, currentPage) {
 }
 
 // Function to render jobs based on the current filter and page
-function renderJobs(filter, jobs, currentPage, totalJobs) {
+function renderJobs(filter, jobs, currentPage, totalJobs, savedJobs) {
     const jobsList = document.getElementById('jobs-list');
     const noJobsMsg = document.getElementById('no-jobs-msg');
     const paginationContainer = document.querySelector('.pagination-container');
@@ -102,7 +101,9 @@ function renderJobs(filter, jobs, currentPage, totalJobs) {
                 }</p>
                 <p class="remote-status"><strong>Remote:</strong> ${job.is_remote ? 'Yes' : 'No'}</p>
                 <div class="text-center">
-                    <button data-id="${job._id}" class="btn btn-1 bookmark-btn"><i class="fa-regular fa-bookmark"></i></button>
+                    <button data-id="${job._id}" class="btn btn-1 bookmark-btn"><i class="${
+                        savedJobs.includes(job._id) ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'
+                    }"></i></button>
                     <a href="/dashboard/jobs/${job._id}" target="_blank" class="btn btn-1">View Job</a>
                     <a href="${job.job_url}" target="_blank" class="btn btn-1">Apply</a>
                 </div>
@@ -120,6 +121,7 @@ function renderJobs(filter, jobs, currentPage, totalJobs) {
 // Function to fetch jobs
 async function fetchJobs(filter = 'all', page = 1) {
     const loadingOverlay = document.getElementById('loading-overlay');
+    const jobsList = document.getElementById('jobs-list');
     if (!loadingOverlay) {
         console.error("Loading overlay element not found");
         return;
@@ -142,32 +144,18 @@ async function fetchJobs(filter = 'all', page = 1) {
         if (!response.ok) {
             throw new Error(`Failed to fetch jobs: ${response.status} ${response.statusText}`);
         }
-        
-        // option - 1
-        // // Ensure response isn't empty before parsing
-        // const text = await response.text();
-        // if (!text) {
-            //     throw new Error('Empty response received from server');
-            // }
-            
-            // const data = JSON.parse(text); // Explicitly parse text
-            
-        // option - 2
-        const contentType = response.headers.get("content-type");
 
-        if (contentType && contentType.includes("Application/JSON")) {
-            const data = response.JSON();
+        const data = await response.json();
 
-            if (data.jobs && Array.isArray(data.jobs)) {
-                currentPage = page
-                // Render fetched jobs
-                renderJobs(filter, data.jobs, currentPage, data.totalJobs);
-            } else {
-                const jobsList = document.getElementById('jobs-list');
-                jobsList.innerHTML = '<p>No jobs found.</p>';
-                document.querySelector('.pagination-container').innerHTML = '';
-            }
+        if (data.jobs && Array.isArray(data.jobs)) {
+            currentPage = page
+            // Render fetched jobs
+            renderJobs(filter, data.jobs, currentPage, data.totalJobs, data.savedJobs);
+        } else {
+            jobsList.innerHTML = '<p>No jobs found.</p>';
+            document.querySelector('.pagination-container').innerHTML = '';
         }
+
     } catch (err) {
         console.error('Error fetching jobs:', err);
         jobsList.innerHTML = `<p style="color: red;">${err.message || "An unexpected error occurred. Please try again later."}</p>`;
@@ -228,9 +216,27 @@ async function toggleBookmark(jobId, button) {
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
+    document.addEventListener('click', (event) => {
+        // Ensure event.target is a valid DOM element
+        if (!(event.target instanceof Element)) return;
 
-    // Render jobs
-    await fetchJobs();
+        // Ignore clicks inside elements with class "profile-logout"
+        if (event.target.closest('.profile-logout a')) {
+            console.log("Profile or Logout clicked. Skipping event.");
+            return; // Do nothing
+        }
+
+        // Other click event logic here
+        console.log("Clicked outside profile-logout");
+    });
+
+    /* Check if user's on dashboard -- this condition force-executes 
+    fetchJobs() when navigating back from other pages as DOM elements might
+    not have loaded yet and hence avoids the need to refresh the page to see
+    jobs */
+    if (window.location.pathname === "/dashboard") {
+        await fetchJobs();  //  Initial load
+    }
 
     // Express-flash message handles
     processFlashAlert(document.querySelector('.alert-success'));
@@ -244,5 +250,5 @@ document.addEventListener('DOMContentLoaded', async () => {
             const jobId = button.dataset.id;
             await toggleBookmark(jobId, button)
         }
-    })
+    });
 });
