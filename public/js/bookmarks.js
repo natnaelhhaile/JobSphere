@@ -12,53 +12,8 @@ function fixUnclosedTags(description) {
     }
 }
 
-// Filter jobs when a button is clicked
-function filterJobs(site) {
-    currentPage = 1; // Reset to the first page
-    
-    const filterButtons = document.querySelectorAll('.job-filter.btn');
-    if (!filterButtons) {
-        console.error('No filter buttons found.');
-        return;
-    }
-
-    // Batch DOM updates for better performance
-    requestAnimationFrame(() => {
-        filterButtons.forEach(btn => btn.classList.remove('active-filter'));
-        const selectedButton = document.querySelector(`.btn-${site}`);
-        if (selectedButton) {
-            selectedButton.classList.add('active-filter'); // Highlight the selected button
-        } else {
-            console.warn(`Filter button for '${site}' not found.`);
-        }
-    });
-    fetchJobs(site, currentPage); // Re-render jobs
-}
-
-function updateFilterButtons(jobCounts) {
-    // Loop through job count keys and update only the count inside the button
-    Object.keys(jobCounts).forEach(site => {
-        const button = document.querySelector(`.btn-${site}`);
-        if (button) {
-            let countElement = button.querySelector('.site-count');
-            if (!countElement) {
-                console.warn(`Count element for '${site}' not found inside button.`);
-                return;
-            }
-            // Find the count and update it
-            countElement.textContent = ` (${jobCounts[site] || 0})`;
-        } else {
-            console.warn(`Filter button for '${site}' not found.`);
-        }
-    });
-
-    const totalCount = Object.values(jobCounts).reduce((total, count) => total + count, 0);
-    document.querySelector('.btn-all .site-count').textContent = ` (${totalCount})`;
-}
-
-
 // Function to render pagination
-function renderPagination(filter, totalJobs, currentPage) {
+function renderPagination(totalJobs, currentPage) {
     const jobsPerPage = 8; // Jobs per page
     const paginationContainer = document.querySelector('.pagination-container');
     paginationContainer.innerHTML = '';
@@ -72,30 +27,33 @@ function renderPagination(filter, totalJobs, currentPage) {
             button.setAttribute('aria-current', 'page'); // Accessibility enhancement
         }
         button.textContent = i;
-        button.onclick = () => fetchJobs(filter, i); // Re-render jobs
+        button.onclick = () => fetchJobs(i); // Re-render jobs
         paginationContainer.appendChild(button);
     }
 }
 
 // Function to render jobs based on the current filter and page
-function renderJobs(filter, jobs, currentPage, totalJobs, savedJobs, jobCounts) {
+function renderJobs(jobs, currentPage, totalJobs, savedJobs) {
     const jobsList = document.getElementById('jobs-list');
     const noJobsMsg = document.getElementById('no-jobs-msg');
     const paginationContainer = document.querySelector('.pagination-container');
+    const bookmarkNumbersHeader = document.querySelector('.bookmark-numbers');
 
     if (!jobsList || !noJobsMsg || !paginationContainer) {
         console.error("One or more required elements not found.");
         return;
     }
 
-    if (totalJobs === 0 || jobs.length === 0) {
+    if (totalJobs === 0 || jobs.length === 0 || savedJobs === 0) {
         jobsList.innerHTML = '';
         paginationContainer.innerHTML = '';
+        bookmarkNumbersHeader.innerHTML = '0';
         noJobsMsg.style.display = 'block';
         return;
     }
 
     jobsList.innerHTML = ''; // Clear previous content
+    bookmarkNumbersHeader.textContent = savedJobs.length;
     noJobsMsg.style.display = 'none';
 
     const fragment = document.createDocumentFragment();
@@ -124,7 +82,9 @@ function renderJobs(filter, jobs, currentPage, totalJobs, savedJobs, jobCounts) 
                 <p class="remote-status"><strong>Remote:</strong> ${job.is_remote ? 'Yes' : 'No'}</p>
                 <div class="text-center">
                     <button data-id="${job._id}" class="btn btn-1 bookmark-btn"><i class="${
-                        savedJobs.includes(job._id) ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'
+                        (savedJobs && Array.isArray(savedJobs)) ?
+                        (savedJobs.includes(job._id) ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark') :
+                        'fa-regular fa-bookmark'
                     }"></i></button>
                     <a href="/dashboard/jobs/${job._id}" target="_blank" class="btn btn-1">View Job</a>
                     <a href="${job.job_url}" target="_blank" class="btn btn-1">Apply</a>
@@ -136,57 +96,77 @@ function renderJobs(filter, jobs, currentPage, totalJobs, savedJobs, jobCounts) 
 
     jobsList.appendChild(fragment); // Append all elements at once for better performance
 
-    // Render filter buttons
-    updateFilterButtons(jobCounts);
-
     // Render pagination
-    renderPagination(filter, totalJobs, currentPage);
+    renderPagination(savedJobs.length, currentPage);
+}
+// Function that executes if an api returns unexpected data
+function wrongFormatNoData(jobsList) {
+    if (!jobsList) {
+        console.error("jobsList element not found.");
+        return;
+    }
+
+    console.log('jobs is not an array');
+    jobsList.innerHTML = '<p>No jobs found.</p>';
+    document.querySelector('.pagination-container').innerHTML = '';
 }
 
 // Function to fetch jobs
-async function fetchJobs(filter = 'all', page = 1) {
-    const loadingOverlay = document.getElementById('loading-overlay');
+async function fetchJobs(currentPage = 1) {
     const jobsList = document.getElementById('jobs-list');
+    const loadingOverlay = document.getElementById('loading-overlay');
     if (!loadingOverlay) {
         console.error("Loading overlay element not found");
         return;
     }
     try {
+        loadingOverlay.style.display = 'flex'; // Show loading overlay
 
-        // Show loading overlay
-        loadingOverlay.style.display = 'flex';
-
-        const url = `/dashboard/jobs?site=${filter}&page=${page}`;
+        const url = `/bookmarks/jobs?page=${currentPage}`;
         const response = await fetch(url, {
-             credentials: 'include',
-             headers: {
-                'Cache-Control': 'no-cache', // Prevent caching
+            credentials: 'include',
+            headers: {
+                'Cache-Control': 'no-cache',
                 'Pragma': 'no-cache',
             }
         });
 
-        // Check for errors in the API response
         if (!response.ok) {
             throw new Error(`Failed to fetch jobs: ${response.status} ${response.statusText}`);
         }
 
-        const data = await response.json();
+        const result = await response.json();
 
-        if (data.jobs && Array.isArray(data.jobs)) {
-            currentPage = page
-            // Render fetched jobs
-            renderJobs(filter, data.jobs, currentPage, data.totalJobs, data.savedJobs, data.jobCounts);
-        } else {
-            jobsList.innerHTML = '<p>No jobs found.</p>';
-            document.querySelector('.pagination-container').innerHTML = '';
+        // Ensuring the values of the json aren't empty or undefined
+        if (!result.jobs || !Array.isArray(result.jobs)) {
+            console.warn('Invalid or missing jobs data in response.');
+            wrongFormatNoData(jobsList);
+            return;
         }
+        if (!result.savedJobs || !Array.isArray(result.savedJobs)) {
+            console.warn('Invalid or missing savedJobs data in response.');
+            wrongFormatNoData(jobsList);
+            return;
+        }
+        if (!result.currentPage || typeof result.currentPage !== 'number') {
+            console.warn('Invalid or missing currentPage data in response.');
+            wrongFormatNoData(jobsList);
+            return;
+        }        
+        if (!result.totalJobs || typeof result.totalJobs !== 'number') {
+            console.warn('Invalid or missing totalJobs data in response.');
+            wrongFormatNoData(jobsList);
+            return;
+        }
+
+        // rendering jobs
+        renderJobs(result.jobs, result.currentPage, result.savedJobs.length, result.savedJobs);
 
     } catch (err) {
         console.error('Error fetching jobs:', err);
         jobsList.innerHTML = `<p style="color: red;">${err.message || "An unexpected error occurred. Please try again later."}</p>`;
     } finally {
-        // Hide loading overlay
-        loadingOverlay.style.display = 'none';
+        loadingOverlay.style.display = 'none'; // Hide loading overlay
     }
 }
 
@@ -226,13 +206,35 @@ async function toggleBookmark(jobId, button) {
 
         const result = await response.json();
 
-            // toggle UI based on new bookmark status
-            const icon = button.querySelector('i');
-            if (result.saved) {
-                icon.classList.replace('fa-regular', 'fa-solid');
-            } else {
-                icon.classList.replace('fa-solid', 'fa-regular');
-            }
+        // toggle UI based on new bookmark status
+        const icon = button.querySelector('i');
+        if (result.saved) {
+            icon.classList.replace('fa-regular', 'fa-solid');
+        } else {
+            icon.classList.replace('fa-solid', 'fa-regular');
+        }
+
+        // Validate response before calling fetchJobs
+        if (!result.jobs || !Array.isArray(result.jobs)) {
+            console.warn('Invalid or missing jobs data in response.');
+            return;
+        }
+        if (!result.savedJobs || !Array.isArray(result.savedJobs)) {
+            console.warn('Invalid or missing savedJobs data in response.');
+            return;
+        }
+        if (!result.currentPage || typeof result.currentPage !== 'number') {
+            console.warn('Invalid or missing currentPage data in response.');
+            return;
+        }
+
+        // ✅ Fetch the current active pagination button
+        const activePageButton = document.querySelector('.pagination-btn[aria-current="page"]');
+        const currentPage = activePageButton ? parseInt(activePageButton.textContent, 10) : result.currentPage;
+
+        // Fetch updated job list
+        await fetchJobs(currentPage || result.currentPage);
+
     } catch (err) {
         console.error('Error toggling bookmark:', err);
         // Todo: redesign #flash-messages to show error or success messages on the dashboard page without Express-flash
@@ -241,6 +243,7 @@ async function toggleBookmark(jobId, button) {
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
+
     document.addEventListener('click', (event) => {
         // Ensure event.target is a valid DOM element
         if (!(event.target instanceof Element)) return;
@@ -255,12 +258,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.log("Clicked outside profile-logout");
     });
 
-    /* Check if user's on dashboard -- this condition force-executes 
+    /* Check if user's on bookmarks page -- this condition force-executes 
     fetchJobs() when navigating back from other pages as DOM elements might
     not have loaded yet and hence avoids the need to refresh the page to see
     jobs */
-    if (window.location.pathname === "/dashboard") {
-        await fetchJobs();  //  Initial load
+    if (window.location.pathname === "/bookmarks") {
+        await fetchJobs();
     }
 
     // Express-flash message handles

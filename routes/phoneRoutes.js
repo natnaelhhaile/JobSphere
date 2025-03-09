@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const config = require('../utils/config'); // Centralized configuration
+const config = require('../config/configEnv'); // Centralized configuration
 const { authMiddleware } = require('../utils/authUtils');
 
 // Twilio Credentials
@@ -26,6 +26,7 @@ router.post('/validate-phone', authMiddleware, async (req, res) => {
             }
         });
         const { phone_number, country_code, valid } = response.data;
+        console.log("valid?:", valid);
         if (valid) {
             res.status(200).json({ 
                 type: 'success',

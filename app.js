@@ -4,7 +4,9 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const expressSession = require('express-session');
 const flash = require('connect-flash');
-const config = require('./utils/config'); // Centralized configuration
+const passport = require('passport');
+require('./config/passportConfig'); // Passport configuration
+const config = require('./config/configEnv'); // Centralized configuration
 const app = express();
 
 // Routes
@@ -13,6 +15,7 @@ const resumeRoutes = require('./routes/resumeRoutes');
 const phoneRoutes = require('./routes/phoneRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const bookmarkRoutes = require('./routes/bookmarkRoutes');
 
 // Middleware setup
 app.use(cookieParser());
@@ -59,11 +62,18 @@ app.get('/', (req, res) => {
 });
 
 // Modularized routes
+app.use(passport.initialize());
+app.use(passport.session());
 app.use('/auth', authRoutes); // Authentication routes
 app.use('/resume', resumeRoutes); // Resume routes
 app.use('/profile', profileRoutes); // Profile routes
 app.use('/api/phones', phoneRoutes); // Phone routes
 app.use('/dashboard', dashboardRoutes); // Dashboard routes
+app.use('/bookmarks', bookmarkRoutes); // Bookmark routes
+
+// app.get("/:page", (req, res) => {
+//     res.render(req.params.page, { activePage: req.params.page });
+// });
 
 // Start the server
 app.listen(config.PORT, () => {

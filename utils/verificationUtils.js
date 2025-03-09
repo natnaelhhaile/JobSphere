@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
-const config = require('../utils/config'); // Centralized configuration
+const config = require('../config/configEnv'); // Centralized configuration
 const client = require('twilio')(
     config.TWILIO_ACCOUNT_SID,
     config.TWILIO_AUTH_TOKEN
@@ -13,7 +13,7 @@ function generateVerificationToken(email) {
 
 async function sendVerificationEmail(userEmail, token) {
 
-    const verificationLink = `${config.APP_BASE_URL}/verify-email?token=${token}`;
+    const verificationLink = `${config.APP_BASE_URL}/profile/verify-email?token=${token}`;
 
     const transporter = nodemailer.createTransport({
         service: config.EMAIL_SERVICE,
@@ -23,15 +23,6 @@ async function sendVerificationEmail(userEmail, token) {
         },
         secure: true
     })
-
-    // Check if the transporter is configured correctly
-    // transporter.verify((error, success) => {
-    //     if (error) {
-    //         console.log('Error with Nodemailer configuration:', error);
-    //     } else {
-    //         console.log('Nodemailer is configured correctly:', success);
-    //     }
-    // });    
 
     const mailOptions = {
         from: config.USER_EMAIL,
@@ -68,6 +59,7 @@ async function sendOTP(phoneNumber, otp) {
 async function sendOTPToPhone(phoneNumber) {
     const { otp, token } = generatePhoneToken(phoneNumber);
     await sendOTP(phoneNumber, otp);
+    console.log(token);
     return token;
 }
 

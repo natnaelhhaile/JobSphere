@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const multer = require('multer');
 const { authMiddleware } = require('../utils/authUtils');
 const { uploadResumeAndParse, searchJobsFromResume } = require('../utils/dbUtils');
@@ -14,9 +15,16 @@ router.post('/upload', authMiddleware, upload, async (req, res) => {
         return res.status(400).json({ type: 'danger', message: 'No file uploaded!' });
     }
     try {
-        const userId = req.userId;
-        const resumeData = await uploadResumeAndParse(req.file.path);
+        // Validate userId
+        if (!mongoose.isValidObjectId(req.userId)) {
+            return res.status(400).json({ 
+                type: 'danger', 
+                message: "Invalid user ID" 
+            });
+        }
+        const userId = new mongoose.Types.ObjectId(req.userId);
         const user = await User.findById(userId);
+        const resumeData = await uploadResumeAndParse(req.file.path);
         user.resume = resumeData;
         await user.save();
         await searchJobsFromResume(resumeData, userId);
@@ -26,7 +34,10 @@ router.post('/upload', authMiddleware, upload, async (req, res) => {
         ]);
     } catch (err) {
         console.error('Error uploading resume:', err);
-        return res.status(500).json({ type: 'danger', message: 'Error processing resume!' });
+        return res.status(500).json({ 
+            type: 'danger', 
+            message: 'Error processing resume!' 
+        });
     }
 });
 

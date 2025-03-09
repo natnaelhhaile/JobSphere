@@ -359,6 +359,11 @@ btn-group {
     color: white !important;
 }
 
+.btn-facebook {
+    background-color: #3b5998 !important;
+    color: white !important;
+}
+
 .icon {
     width: 18px;
     height: 18px;

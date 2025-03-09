@@ -4,7 +4,7 @@ const axios = require('axios');
 const marked = require('marked');
 const { exec } = require('child_process');
 const Job = require('../models/Job');
-const config = require('../utils/config'); // Centralized configuration
+const config = require('../config/configEnv'); // Centralized configuration
 
 // Function to call Resume Parser API to upload and parse resume
 async function uploadResumeAndParse(filePath) {
@@ -147,13 +147,14 @@ async function getStoredJobs(filter, page) {
         const jobsPerPage = 8;
         const jobs = await Job.find(filter)
             .skip((page - 1) * jobsPerPage)
-            .limit(jobsPerPage);
+            .limit(jobsPerPage)
+            .exec();
         const totalJobs = await Job.countDocuments(filter);
         console.log(totalJobs);
 
         // Calculate job counts for each site
         const jobCounts = await Job.aggregate([
-            { $match: filter }, // Match jobs with the filter
+            { $match: { user: filter.user } }, // Match jobs with the filter
             { $group: { _id: "$site", count: { $sum: 1 } } },
         ]);
 
