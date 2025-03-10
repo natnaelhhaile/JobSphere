@@ -1,19 +1,31 @@
-<!-- header.ejs -->
 <header>
     <div class="header-container">
-        <!-- Logo on the left -->
+        <!-- Logo -->
         <div class="logo">
-            <a href="/dashboard" title="Return to Dashboard">
+            <a href="/dashboard">
                 <img src="/images/logo_m.png" alt="Logo" class="logo-img">
             </a>
         </div>
 
-        <!-- Right section (Profile icon and Signout button) -->
-        <div class="header-right">
-            <div class="profile-logout">
-                <a href="/profile" class="fa-solid fa-user" title="Profile Page"></a>
-                <a href="/auth/logout" class="fa-solid fa-right-from-bracket" title="Logout"></a>
-            </div>
-        </div>
+        <!-- Navigation Links (Hidden in mobile, toggled with button) -->
+        <nav class="nav-links">
+            <a href="/dashboard" class="<%= activePage === 'dashboard' ? 'active' : '' %>">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+            <a href="/bookmarks" class="<%= activePage === 'bookmarks' ? 'active' : '' %>">
+                <i class="fas fa-bookmark"></i> Bookmarks
+            </a>
+            <a href="/profile" class="<%= activePage === 'profile' ? 'active' : '' %>">
+                <i class="fas fa-user"></i> Profile
+            </a>
+            <a href="/auth/logout" class="logout-link">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </nav>
+
+        <!-- Mobile Menu Button -->
+        <button class="menu-toggle" onclick="toggleMobileMenu()">
+            <i class="fas fa-bars"></i>
+        </button>
     </div>
 </header>

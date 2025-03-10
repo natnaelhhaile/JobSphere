@@ -1,3 +1,7 @@
+function toggleMobileMenu() {
+    document.querySelector('.nav-links').classList.toggle('show');
+}
+
 function fixUnclosedTags(description) {
     // Handle empty/non-string input
     if (typeof(description) !== 'string' || !description.trim()) return '';

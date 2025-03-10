@@ -9,7 +9,7 @@ const router = express.Router();
 
 // Main dashboard route
 router.get('/', authMiddleware, async (req, res) => {
-    return res.render('dashboard');
+    return res.render('dashboard', { activePage: 'dashboard' });
 });
 
 // Fetch jobs dynamically for filtering and pagination

@@ -8,8 +8,42 @@ const router = express.Router();
 
 // Render the bookmarks page
 router.get('/', authMiddleware, async (req, res) => {
-    return res.render('bookmarks');
+    try {
+        // Validate userId
+        if (!mongoose.isValidObjectId(req.userId)) {
+            req.flash('error_msg', 'Invalid user ID');
+            return res.render('bookmarks', { activePage: 'bookmarks' });
+        }
+        const userId = new mongoose.Types.ObjectId(req.userId);
+        await refreshBookmarkedJobs(userId);
+
+        return res.render('bookmarks', { activePage: 'bookmarks' });
+    } catch (error) {
+        console.error(err);
+        req.flash('error_msg', 'An error occurred while fetching your saved jobs.');
+        return res.redirect('/dashboard');
+    }
 });
+
+// Function to update the savedJobs field whenever the jobs are refreshed in the database
+async function refreshBookmarkedJobs(userId) {
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            console.error("User not found!");
+            return;
+        }
+        const existingJobs = await Job.find({ _id: { $in: user.savedJobs } }).select("_id");
+        // Extract valid Job Ids
+        const existingJobIds = existingJobs.map(job => job._id.toString());
+        // Update `user.savedJobs` in the database to only keep valid job IDs
+        await User.findByIdAndUpdate(user._id, { savedJobs: existingJobIds });
+        return;
+    } catch (error) {
+        console.error("Updating bookmarked jobs was unsuccessful");
+        return;
+    }
+}
 
 // Function to populate bookmarked jobs with pagination
 async function populateBookmarkedJobs(userId, page) {
@@ -27,11 +61,28 @@ async function populateBookmarkedJobs(userId, page) {
         const end = Math.min(page * jobsPerPage, user.savedJobs.length)
         const paginatedJobIds = user.savedJobs
             .slice(start, end);
+        
+        if (paginatedJobIds.length === 0) {
+            console.warn(`No jobs found for page ${page}`);
+            return { jobs: [] };
+        }
+
+        // Convert job IDs to ObjectId if needed
+        const objectIdJobIds = paginatedJobIds.map(id =>
+            mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : null)
+            .filter(id => id !== null); // Remove nulls
+
+        console.log(`Raw Job IDs:`, paginatedJobIds);
+        console.log(`Converted ObjectId Job IDs:`, objectIdJobIds);
+        console.log(`Executing query:`, { _id: { $in: objectIdJobIds } });
+            
 
         // Fetch only the jobs that match the paginated IDs, ensuring order is preserved
-        const paginatedJobs = await Job.find({ _id: { $in: paginatedJobIds } })
+        const paginatedJobs = await Job.find({ _id: { $in: objectIdJobIds } })
             .sort({ _id: -1 }) // Sorting ensures newest jobs appear first (MongoDB default)
-            .exec();
+            .lean();    // Using lean() for better performance
+
+        console.log(start, end, paginatedJobs.length);
 
         return { jobs: paginatedJobs };
     } catch (err) {
@@ -57,6 +108,7 @@ router.get('/jobs', authMiddleware, async (req, res) => {
 
         // Fetch bookmarked jobs
         const { jobs } = await populateBookmarkedJobs(userId, page);
+        // console.log(page, jobs.length, user.savedJobs.length);
         return res.status(200).json({
             jobs,
             currentPage: page,

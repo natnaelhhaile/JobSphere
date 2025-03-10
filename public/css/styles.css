@@ -1,4 +1,5 @@
 /******************************* General body styles *******************************/
+
 :root {
     /* --primary-color: #7fc0b9; */
     --primary-color: #85cbcb;
@@ -126,55 +127,68 @@ a.disabled {
     right: 0.75rem;
 }
 
-/****************************** Header styling ******************************/
+/******************************* Header Styling *******************************/
 
 header {
     background-color: var(--primary-color);
     color: white;
     padding: 10px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    width: 100%;
 }
 
+/* Ensures proper spacing inside the header */
 .header-container {
     display: flex;
-    justify-content: space-between;
-    width: 100%;
     align-items: center;
+    justify-content: space-between; /* Ensures logo stays left, links move right */
+    width: 100%;
+}
+
+/* Logo (Stays on the Left) */
+.logo {
+    margin-right: auto; /* Keeps it on the left */
+    margin-left: 50px;
 }
 
 .logo .logo-img {
     width: 100px;
-    margin-left: 50px;
     border-radius: 10px;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
 }
 
-.header-right {
+/* Navigation Bar (Now Aligned to the Right) */
+.nav-links {
     display: flex;
-    align-items: center;
-}
-
-.profile-logout{
+    justify-content: flex-end; /* Moves links to the right */
+    gap: 5px;
     margin-right: 50px;
 }
 
-.profile-logout a{
-    padding-right: 15px;
-}
-
-.signout-btn {
-    background-color: #e74c3c;
+.nav-links a {
     color: white;
-    border: none;
-    padding: 8px 15px;
-    cursor: pointer;
+    text-decoration: none;
+    font-size: 16px;
+    padding: 10px 15px;
     border-radius: 5px;
+    transition: background 0.3s;
 }
 
-.signout-btn:hover {
-    background-color: #c0392b;
+.nav-links a:hover,
+.nav-links a.active {
+    border-color: var(--primary-color) !important;
+    background-color: var(--bg-color) !important;
+    color: var(--primary-color) !important;
+}
+
+/* Mobile Menu Button */
+.menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+    margin-right: 25px;
 }
 
 /******************************* Footer styling *******************************/
@@ -232,7 +246,7 @@ footer {
 
 .jobs-container {
     margin-top: 35px;
-    width: 75% !important;
+    width: auto !important;
 }
 
 .jobs-pagination {
@@ -303,40 +317,60 @@ footer {
     color: #007bff;
 }
 
-btn-group {
-    position: relative;
-    float: right!important;
+.pagination-btn {
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    margin: 0 2px;
 }
 
-.btn-group .btn {
+/******************************* Job Filter Buttons *******************************/
+
+.job-filter {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end; /* Align to the right on large screens */
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.job-filter .btn {
     display: flex;
     align-items: center;
+    justify-content: center;
     padding: 10px 15px;
     font-size: 14px;
-    /* font-weight: bold; */
     border: none;
     border-radius: 5px;
-    margin-right: 5px;
     color: white;
+    min-width: 120px;
+    transition: transform 0.2s, box-shadow 0.2s;
 }
 
-/* Add color styles for each site */
-
-.active-filter {
-    color: #fff;
-    font-weight: bold !important;
+.job-filter .btn:hover {
     transform: scale(1.05);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
+/* Ensure text spacing */
+.job-filter .btn i,
+.job-filter .btn img {
+    margin-right: 8px;
+}
+
+/* Active filter effect */
+.active-filter {
+    font-weight: bold !important;
+    transform: scale(1.05) !important;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Job Platform Colors */
 .btn-all {
     background-color: #6ec8c8 !important;
-    color: white !important;
 }
 
 .btn-linkedin {
     background-color: #0077b5 !important;
-    color: white !important;
 }
 
 .btn-indeed {
@@ -346,32 +380,20 @@ btn-group {
 
 .btn-glassdoor {
     background-color: #235333 !important;
-    color: white !important;
 }
 
 .btn-zip_recruiter {
     background-color: #ff9f1c !important;
-    color: white !important;
 }
 
 .btn-google {
     background-color: #db4437 !important;
-    color: white !important;
-}
-
-.btn-facebook {
-    background-color: #3b5998 !important;
-    color: white !important;
 }
 
 .icon {
     width: 18px;
     height: 18px;
-    margin: 0 3px 4px;
-}
-
-.job-filter .btn .fab {
-    margin-right: 5px !important;
+    margin-right: 5px;
 }
 
 .job-logo {
@@ -379,12 +401,6 @@ btn-group {
     height: 50px;
     object-fit: cover;
     margin-right: 10px;
-}
-
-.pagination-btn {
-    border-radius: 4px;
-    transition: all 0.3s ease;
-    margin: 0 2px;
 }
 
 /******************************* Upload Resume *******************************/
@@ -546,4 +562,67 @@ btn-group {
     border-radius: 10px;
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
     color: #444 !important;
+}
+
+/********************************* Responsive Design -- Media Queries *********************************/
+
+@media (max-width: 768px) {
+
+    /* Header Page */
+
+    .header-container {
+        justify-content: space-between; /* Keeps logo left and menu button right */
+    }
+
+    .logo {
+        margin-left: 25px;
+    }
+
+    .nav-links {
+        display: none; /* Hide by default on small screens */
+        flex-direction: column;
+        position: absolute;
+        top: 60px;
+        right: 0;
+        background-color: var(--primary-color);
+        width: 100%;
+        text-align: right;
+        padding: 10px 20px;
+    }
+
+    .nav-links.show {
+        display: flex; /* Show when toggled */
+    }
+
+    .menu-toggle {
+        display: block;
+    }
+
+    .nav-links.show {
+        z-index: 9999; /* ✅ Ensures dropdown stays above other elements */
+        position: relative;
+    }
+
+    /* Dashboard/Bookmarks Page -- Job Lists */
+
+    .job-item {
+        width: 95% !important;
+    }
+
+    /* Job filter buttons by site */
+
+    .job-filter {
+        justify-content: center; /* ✅ Center-align on mobile */
+        gap: 8px;
+    }
+
+    .job-filter .btn {
+        width: calc(50% - 10px); /* ✅ Make 3 buttons per row */
+        flex-grow: 1;
+    }
+
+    .job-filter {
+        z-index: 1000; /* ✅ Prevents buttons from being covered */
+        position: relative;
+    }
 }
