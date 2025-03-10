@@ -8,8 +8,42 @@ const router = express.Router();
 
 // Render the bookmarks page
 router.get('/', authMiddleware, async (req, res) => {
-    return res.render('bookmarks');
+    try {
+        // Validate userId
+        if (!mongoose.isValidObjectId(req.userId)) {
+            req.flash('error_msg', 'Invalid user ID');
+            return res.render('bookmarks', { activePage: 'bookmarks' });
+        }
+        const userId = new mongoose.Types.ObjectId(req.userId);
+        await refreshBookmarkedJobs(userId);
+
+        return res.render('bookmarks', { activePage: 'bookmarks' });
+    } catch (error) {
+        console.error(err);
+        req.flash('error_msg', 'An error occurred while fetching your saved jobs.');
+        return res.redirect('/dashboard');
+    }
 });
+
+// Function to update the savedJobs field whenever the jobs are refreshed in the database
+async function refreshBookmarkedJobs(userId) {
+    try {
+        const user = await User.findById(userId);
+        if (!user) {
+            console.error("User not found!");
+            return;
+        }
+        const existingJobs = await Job.find({ _id: { $in: user.savedJobs } }).select("_id");
+        // Extract valid Job Ids
+        const existingJobIds = existingJobs.map(job => job._id.toString());
+        // Update `user.savedJobs` in the database to only keep valid job IDs
+        await User.findByIdAndUpdate(user._id, { savedJobs: existingJobIds });
+        return;
+    } catch (error) {
+        console.error("Updating bookmarked jobs was unsuccessful");
+        return;
+    }
+}
 
 // Function to populate bookmarked jobs with pagination
 async function populateBookmarkedJobs(userId, page) {
@@ -17,23 +51,43 @@ async function populateBookmarkedJobs(userId, page) {
     try {
         // Find the user
         const user = await User.findById(userId);
-        const totalJobs = user.savedJobs.length; // Total count of saved jobs
         if (!user || !user.savedJobs || user.savedJobs.length === 0) {
             console.warn('User has no saved jobs');
-            return { jobs: [], totalJobs: 0 };
+            return { jobs: [] };
+        }
+        
+        // Get only the job IDs needed in the requested page
+        const start = Math.max((page - 1) * jobsPerPage, 0);
+        const end = Math.min(page * jobsPerPage, user.savedJobs.length)
+        const paginatedJobIds = user.savedJobs
+            .slice(start, end);
+        
+        if (paginatedJobIds.length === 0) {
+            console.warn(`No jobs found for page ${page}`);
+            return { jobs: [] };
         }
 
-        // Fetch jobs in a single query for better efficiency
-        const paginatedJobs = await Job.find({ _id: { $in: user.savedJobs } })
-            .sort({ _id: -1 }) // Sort jobs by most recent (MongoDB default)
-            .skip((page - 1) * jobsPerPage)
-            .limit(jobsPerPage)
-            .exec();
+        // Convert job IDs to ObjectId if needed
+        const objectIdJobIds = paginatedJobIds.map(id =>
+            mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : null)
+            .filter(id => id !== null); // Remove nulls
 
-        return { jobs: paginatedJobs, totalJobs };
+        console.log(`Raw Job IDs:`, paginatedJobIds);
+        console.log(`Converted ObjectId Job IDs:`, objectIdJobIds);
+        console.log(`Executing query:`, { _id: { $in: objectIdJobIds } });
+            
+
+        // Fetch only the jobs that match the paginated IDs, ensuring order is preserved
+        const paginatedJobs = await Job.find({ _id: { $in: objectIdJobIds } })
+            .sort({ _id: -1 }) // Sorting ensures newest jobs appear first (MongoDB default)
+            .lean();    // Using lean() for better performance
+
+        console.log(start, end, paginatedJobs.length);
+
+        return { jobs: paginatedJobs };
     } catch (err) {
         console.error('Error fetching saved jobs:', err);
-        return { jobs: [], totalJobs: 0 };
+        return { jobs: [] };
     }
 }
 
@@ -53,12 +107,11 @@ router.get('/jobs', authMiddleware, async (req, res) => {
         const page = parseInt(req.query.page, 10) || 1; // Correctly extract page number
 
         // Fetch bookmarked jobs
-        const { jobs, totalJobs} = await populateBookmarkedJobs(userId, page);
-
+        const { jobs } = await populateBookmarkedJobs(userId, page);
+        // console.log(page, jobs.length, user.savedJobs.length);
         return res.status(200).json({
             jobs,
             currentPage: page,
-            totalJobs,
             savedJobs: user?.savedJobs || []
         });
     } catch (error) {
@@ -68,7 +121,6 @@ router.get('/jobs', authMiddleware, async (req, res) => {
             message: 'Internal server error',
             jobs: [],
             currentPage: 1,
-            totalJobs: 0,
             savedJobs: []
         });
     }
@@ -104,22 +156,16 @@ router.post('/toggle', authMiddleware, async (req, res) => {
         if (user.savedJobs.includes(jobId)) {
             user.savedJobs = user.savedJobs.filter(id => id.toString() !== jobId.toString());
         } else {
-            user.savedJobs.push(jobId);
+            user.savedJobs.unshift(jobId);
             saved = true;
         }
         await user.save();
-
-        // Fetch updated bookmarked jobs
-        const bookmarkedJobs = await populateBookmarkedJobs(userId, page);
 
         return res.status(200).json({ 
             type: 'success',
             message: saved ? 'Job bookmarked successfully!' : 'Job removed from bookmarks!', 
             saved,
-            jobs: bookmarkedJobs,
-            currentPage: page,
-            totalJobs: bookmarkedJobs.length,
-            savedJobs: user.savedJobs
+            currentPage: page
         });
     } catch (error) {
         console.error('Error toggling bookmark:', error);
@@ -127,10 +173,7 @@ router.post('/toggle', authMiddleware, async (req, res) => {
             type: 'danger',
             message: 'Internal server error',
             saved: false,
-            jobs: [],
-            currentPage: 1,
-            totalJobs: 0,
-            savedJobs: []
+            currentPage: 1
         });
     }
 });

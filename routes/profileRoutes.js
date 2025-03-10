@@ -27,6 +27,7 @@ router.get('/', authMiddleware, async (req, res) => {
         }
 
         return res.render('profile', {
+            activePage: 'profile',
             username: user.username,
             email: user.email,
             secondaryEmail: user.secondaryEmail,

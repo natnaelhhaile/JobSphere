@@ -258,3 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     formsConfig.forEach(setupFormHandler);
 });
+
+function toggleMobileMenu() {
+    document.querySelector('.nav-links').classList.toggle('show');
+}
