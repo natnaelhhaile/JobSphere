@@ -13,11 +13,11 @@ function fixUnclosedTags(description) {
 }
 
 // Function to render pagination
-function renderPagination(totalJobs, currentPage) {
+function renderPagination(totalSavedJobs, currentPage) {
     const jobsPerPage = 8; // Jobs per page
     const paginationContainer = document.querySelector('.pagination-container');
     paginationContainer.innerHTML = '';
-    const totalPages = Math.ceil(totalJobs / jobsPerPage);
+    const totalPages = Math.ceil(totalSavedJobs / jobsPerPage);
 
     for (let i = 1; i <= totalPages; i++) {
         const button = document.createElement('button');
@@ -33,7 +33,7 @@ function renderPagination(totalJobs, currentPage) {
 }
 
 // Function to render jobs based on the current filter and page
-function renderJobs(jobs, currentPage, totalJobs, savedJobs) {
+function renderJobs(jobs, currentPage, savedJobs) {
     const jobsList = document.getElementById('jobs-list');
     const noJobsMsg = document.getElementById('no-jobs-msg');
     const paginationContainer = document.querySelector('.pagination-container');
@@ -44,14 +44,23 @@ function renderJobs(jobs, currentPage, totalJobs, savedJobs) {
         return;
     }
 
-    if (totalJobs === 0 || jobs.length === 0 || savedJobs === 0) {
-        jobsList.innerHTML = '';
-        paginationContainer.innerHTML = '';
-        bookmarkNumbersHeader.innerHTML = '0';
-        noJobsMsg.style.display = 'block';
-        return;
+    if (jobs.length === 0) {
+        if (savedJobs.length === 0) {
+            // No saved jobs at all
+            jobsList.innerHTML = '';
+            paginationContainer.innerHTML = '';
+            bookmarkNumbersHeader.innerHTML = '0';
+            noJobsMsg.style.display = 'block';
+            return;
+        }
+    
+        if (currentPage > 1) {
+            console.warn(`No jobs found for page ${currentPage}. Trying previous page.`);
+            fetchJobs(currentPage - 1); // Fetch previous page instead
+            return;
+        }
     }
-
+    
     jobsList.innerHTML = ''; // Clear previous content
     bookmarkNumbersHeader.textContent = savedJobs.length;
     noJobsMsg.style.display = 'none';
@@ -83,8 +92,8 @@ function renderJobs(jobs, currentPage, totalJobs, savedJobs) {
                 <div class="text-center">
                     <button data-id="${job._id}" class="btn btn-1 bookmark-btn"><i class="${
                         (savedJobs && Array.isArray(savedJobs)) ?
-                        (savedJobs.includes(job._id) ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark') :
-                        'fa-regular fa-bookmark'
+                            (savedJobs.includes(job._id) ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark') :
+                                'fa-regular fa-bookmark'
                     }"></i></button>
                     <a href="/dashboard/jobs/${job._id}" target="_blank" class="btn btn-1">View Job</a>
                     <a href="${job.job_url}" target="_blank" class="btn btn-1">Apply</a>
@@ -99,6 +108,7 @@ function renderJobs(jobs, currentPage, totalJobs, savedJobs) {
     // Render pagination
     renderPagination(savedJobs.length, currentPage);
 }
+
 // Function that executes if an api returns unexpected data
 function wrongFormatNoData(jobsList) {
     if (!jobsList) {
@@ -153,14 +163,9 @@ async function fetchJobs(currentPage = 1) {
             wrongFormatNoData(jobsList);
             return;
         }        
-        if (!result.totalJobs || typeof result.totalJobs !== 'number') {
-            console.warn('Invalid or missing totalJobs data in response.');
-            wrongFormatNoData(jobsList);
-            return;
-        }
 
         // rendering jobs
-        renderJobs(result.jobs, result.currentPage, result.savedJobs.length, result.savedJobs);
+        renderJobs(result.jobs, result.currentPage, result.savedJobs);
 
     } catch (err) {
         console.error('Error fetching jobs:', err);
@@ -215,14 +220,6 @@ async function toggleBookmark(jobId, button) {
         }
 
         // Validate response before calling fetchJobs
-        if (!result.jobs || !Array.isArray(result.jobs)) {
-            console.warn('Invalid or missing jobs data in response.');
-            return;
-        }
-        if (!result.savedJobs || !Array.isArray(result.savedJobs)) {
-            console.warn('Invalid or missing savedJobs data in response.');
-            return;
-        }
         if (!result.currentPage || typeof result.currentPage !== 'number') {
             console.warn('Invalid or missing currentPage data in response.');
             return;
@@ -233,7 +230,7 @@ async function toggleBookmark(jobId, button) {
         const currentPage = activePageButton ? parseInt(activePageButton.textContent, 10) : result.currentPage;
 
         // Fetch updated job list
-        await fetchJobs(currentPage || result.currentPage);
+        await fetchJobs(currentPage);
 
     } catch (err) {
         console.error('Error toggling bookmark:', err);
