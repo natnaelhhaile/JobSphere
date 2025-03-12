@@ -12,7 +12,7 @@
 <body>
 
     <!-- Include Header -->
-    <%- include('partials/header') %>
+    <%- include('partials/header', { totalBookmarkedJobs }) %>
     <div class="wrapper">
 
         <!-- Express-flash messages -->
@@ -36,14 +36,19 @@
         <div id="flash-messages" class="mt-3"></div>
     
         <div class="container jobs-container"> 
-            <h2>Your Bookmarked Jobs: 
-                <span class="bookmark-numbers"></span>
+            <h2 class="bookmarks-page-title">Your Bookmarked Jobs
              </h2>
             <div id="jobs-list" class="row mx-auto">
                 <!-- Job cards will be dynamically rendered here -->
             </div>
-            <div id="no-jobs-msg">
-                <p>No jobs found. You'll see your saves here once you start bookmarking jobs.</p>
+
+            <!-- Message for when the user has no saved/bookmarked jobs -->
+            <div id="no-bookmarked-jobs-msg" class="no-jobs-message">
+                <p>
+                    <strong>No bookmarked jobs yet.</strong>  
+                    Start saving jobs on your <a href="/dashboard">dashboard</a>, 
+                    and they will appear here for easy access.
+                </p>
             </div>
         
             <!-- Pagination -->
@@ -64,6 +69,7 @@
 
     <!-- Link to your external JS file -->
     <script src="/js/bookmarks.js"></script>
-    
+    <script src="/js/script.js"></script>
+
 </body>
 </html>

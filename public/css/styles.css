@@ -242,6 +242,11 @@ footer {
     height: 100px;
 }
 
+.btn-facebook {
+    background-color: #1877F2 !important;
+    color: white;
+}
+
 /******************************* Dashboard Styling *******************************/
 
 .jobs-container {
@@ -263,10 +268,25 @@ footer {
     margin: 35px auto;
 }
 
-#no-jobs-msg {
-    display: none; 
-    text-align: center; 
-    margin-top: 20px;
+.no-jobs-message {
+    background-color: #f8f9fa;
+    color: #333;
+    padding: 15px;
+    margin: 20px 0;
+    border-left: 4px solid var(--primary-color);
+    border-radius: 5px;
+    text-align: center;
+    display: none;
+}
+
+.no-jobs-message a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.no-jobs-message a:hover {
+    text-decoration: underline;
 }
 
 .job-item {
@@ -333,22 +353,24 @@ footer {
     margin-top: 20px;
 }
 
+/* Default button styling */
 .job-filter .btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 10px 15px;
-    font-size: 14px;
+    padding: 12px 18px; 
+    font-size: 15px; 
     border: none;
-    border-radius: 5px;
+    border-radius: 20px; 
     color: white;
-    min-width: 120px;
-    transition: transform 0.2s, box-shadow 0.2s;
+    min-width: 130px; 
+    transition: all 0.3s ease; 
+    background-color: #6c757d; 
 }
 
 .job-filter .btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    transform: scale(1.07);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
 /* Ensure text spacing */
@@ -359,9 +381,13 @@ footer {
 
 /* Active filter effect */
 .active-filter {
+    background-color: #007bff !important; 
     font-weight: bold !important;
-    transform: scale(1.05) !important;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1) !important;
+    transform: scale(1.1) !important; 
+    box-shadow: 0 6px 16px rgba(0, 123, 255, 0.4) !important; 
+    font-size: 16px !important;
+    color: white !important;
+    border: 2px solid rgba(255, 255, 255, 0.6) !important;
 }
 
 /* Job Platform Colors */
@@ -386,8 +412,10 @@ footer {
     background-color: #ff9f1c !important;
 }
 
+/* applies to social login google button as well */
 .btn-google {
     background-color: #db4437 !important;
+    color: white;
 }
 
 .icon {
@@ -402,6 +430,18 @@ footer {
     object-fit: cover;
     margin-right: 10px;
 }
+
+/******************************* Bookmarks Page *******************************/
+
+.bookmarks-page-title {
+    font-size: 1.8rem;  /* Adjusts title size without being too large */
+    font-weight: bold;  /* Makes it stand out */
+    color: #4a4e69;  /* A soft dark-grayish color for contrast */
+    text-align: center;  /* Keeps it centered */
+    margin-bottom: 20px;  /* Adds spacing before job cards */
+    text-transform: capitalize; /* Keeps it clean and professional */
+}
+
 
 /******************************* Upload Resume *******************************/
 
@@ -568,41 +608,71 @@ footer {
 
 @media (max-width: 768px) {
 
+    /* Home page/ Landing page */
+    .signup-btns-homepage a{
+        margin-bottom: 40px;
+    }
+
     /* Header Page */
 
     .header-container {
         justify-content: space-between; /* Keeps logo left and menu button right */
+        align-items: center;
+        padding: 10px 20px;
+        position: relative;
+        background-color: var(--primary-color);
     }
 
     .logo {
         margin-left: 25px;
+        z-index: 10000;
+    }
+
+    .menu-toggle {
+        display: block;
+        z-index: 10000;
+        position: relative;
+    }
+
+    .menu-toggle.hide {
+        display: none;
     }
 
     .nav-links {
-        display: none; /* Hide by default on small screens */
+        display: none;
         flex-direction: column;
         position: absolute;
-        top: 60px;
-        right: 0;
+        align-items: center;
+        top: 80px;
+        left: 0;
+        width: 100%; /* Make it full width */
         background-color: var(--primary-color);
-        width: 100%;
-        text-align: right;
-        padding: 10px 20px;
+        text-align: left;
+        padding: 20px;
+        box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+        overflow-y: auto; /* Ensures scrolling if needed */
+        z-index: 9999;
     }
 
     .nav-links.show {
         display: flex; /* Show when toggled */
     }
 
-    .menu-toggle {
+    .nav-links.show a {
+        font-size: 18px;
+        padding: 15px;
+        color: white;
         display: block;
+        width: 100%;
+        text-align: center;
     }
 
-    .nav-links.show {
-        z-index: 9999; /* ✅ Ensures dropdown stays above other elements */
-        position: relative;
+    /* Ensure Dropdown Does Not Move Logo */
+    .header-container.open-menu {
+        background-color: var(--primary-color); /* Keep consistent background */
+        transition: none; /* Prevent movement */
     }
-
+    
     /* Dashboard/Bookmarks Page -- Job Lists */
 
     .job-item {
@@ -612,17 +682,17 @@ footer {
     /* Job filter buttons by site */
 
     .job-filter {
-        justify-content: center; /* ✅ Center-align on mobile */
+        justify-content: center; /* Center-align on mobile */
         gap: 8px;
     }
 
     .job-filter .btn {
-        width: calc(50% - 10px); /* ✅ Make 3 buttons per row */
+        width: calc(50% - 10px); /* Make 3 buttons per row */
         flex-grow: 1;
     }
 
     .job-filter {
-        z-index: 1000; /* ✅ Prevents buttons from being covered */
+        z-index: 1000; /* Prevents buttons from being covered */
         position: relative;
     }
 }

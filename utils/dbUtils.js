@@ -149,8 +149,12 @@ async function getStoredJobs(filter, page) {
             .skip((page - 1) * jobsPerPage)
             .limit(jobsPerPage)
             .exec();
+
+        /* This constant stores the total number of jobs in the requested filter.
+           This could mean site - 'all' or for any specific site. Therefore it is 
+           imperative to remember totalJobs doesn't always mean the sum total of 
+           jobs stored for a user. */
         const totalJobs = await Job.countDocuments(filter);
-        console.log(totalJobs);
 
         // Calculate job counts for each site
         const jobCounts = await Job.aggregate([
@@ -167,16 +171,20 @@ async function getStoredJobs(filter, page) {
             google: 0,
         };
 
+        // Populate counts
         jobCounts.forEach(count => {
             counts[count._id.toLowerCase()] = count.count;
         });
-        console.log(counts);
+
+        // Calculate the sum total of jobs per user
+        const jobCountsSum = jobCounts.reduce((sum, job) => sum + Number(job.count), 0);
 
         return {
             jobs: jobs,
             totalJobs: totalJobs,
             jobCounts: counts,
             currentPage: page,
+            jobCountsSum
         };
     } catch (error) {
         console.error('Error fetching stored jobs:', error);

@@ -12,7 +12,7 @@
 <body>
 
     <!-- Include Header -->
-    <%- include('partials/header') %>
+    <%- include('partials/header', { totalBookmarkedJobs }) %>
     <div class="wrapper">
     
         <!-- Express-flash messages -->
@@ -38,37 +38,50 @@
         <div class="container">
             <!-- Filter buttons -->
             <div class="job-filter btn-group mt-3 ms-auto" style="float: right;">
-                <button class="btn btn-all" onclick="filterJobs('all')">
-                    All <span class="site-count"></span>
+                <button class="btn btn-all active-filter" onclick="filterJobs('all')">
+                    All &nbsp;<span class="site-count badge bg-secondary"></span>
                 </button>
                 <button class="btn btn-linkedin" onclick="filterJobs('linkedin')">
-                    <i class="fab fa-linkedin"></i> LinkedIn <span class="site-count"></span>
+                    <i class="fab fa-linkedin"></i> LinkedIn &nbsp; <span class="site-count badge bg-secondary"></span>
                 </button>
                 <button class="btn btn-indeed" onclick="filterJobs('indeed')">
-                    <img src="/images/icons/indeed.png" alt="Indeed" class="icon"> Indeed <span class="site-count"></span>
+                    <img src="/images/icons/indeed.png" alt="Indeed" class="icon"> Indeed &nbsp; <span class="site-count badge bg-secondary"></span>
                 </button>
                 <button class="btn btn-glassdoor" onclick="filterJobs('glassdoor')">
-                    <img src="/images/icons/glassdoor.png" alt="Glassdoor" class="icon"> Glassdoor <span class="site-count"></span>
+                    <img src="/images/icons/glassdoor.png" alt="Glassdoor" class="icon"> Glassdoor &nbsp;<span class="site-count badge bg-secondary"></span>
                 </button>
                 <button class="btn btn-zip_recruiter" onclick="filterJobs('zip_recruiter')">
-                    ZipRecruiter <span class="site-count"></span>
+                    ZipRecruiter &nbsp;<span class="site-count badge bg-secondary"></span>
                 </button>
                 <button class="btn btn-google" onclick="filterJobs('google')">
-                    <i class="fab fa-google"></i> Google <span class="site-count"></span>
+                    <i class="fab fa-google"></i> Google &nbsp;<span class="site-count badge bg-secondary"></span>
                 </button>
             </div>
         </div>
-    
     
         <div class="container jobs-container"> 
             <!-- <h2>Your Recommended Jobs</h2> -->
             <div id="jobs-list" class="row mx-auto">
                 <!-- Job cards will be dynamically rendered here -->
             </div>
-            <div id="no-jobs-msg">
-                <p>No jobs found. Try adjusting the filters or uploading your resume in the profile page.</p>
+
+            <!-- Message for when no jobs match the selected filter -->
+            <div id="no-filtered-jobs-msg" class="no-jobs-message">
+                <p>
+                    <strong>No jobs found</strong> from the selected site.
+                    Try selecting a different filter or <a href="/resume/upload">updating your resume</a>.
+                </p>
             </div>
-        
+
+            <!-- Message for when the user has no jobs stored in the backend -->
+            <div id="no-user-jobs-msg" class="no-jobs-message">
+                <p>
+                    <strong>No jobs found</strong> in your account.  
+                    Want better recommendations? <a href="/resume/upload">Upload your resume</a> 
+                    in your profile to receive personalized job matches.
+                </p>
+            </div>
+
             <!-- Pagination -->
             <div class="pagination-container text-center my-4"></div>
         </div>
@@ -87,5 +100,6 @@
 
     <!-- Link to your external JS file -->
     <script src="/js/dashboard.js"></script>
+    <script src="/js/script.js"></script>
 </body>
 </html>

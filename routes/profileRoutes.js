@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const config = require('../config/configEnv'); // Centralized configuration
 const { authMiddleware } = require('../utils/authUtils');
 const { generateVerificationToken, sendVerificationEmail, sendOTPToPhone } = require('../utils/verificationUtils');
+const { refreshBookmarkedJobs } = require('./bookmarkRoutes');
 const User = require('../models/User');
 const Job = require('../models/Job');
 
@@ -20,12 +21,14 @@ router.get('/', authMiddleware, async (req, res) => {
         }
         const userId = new mongoose.Types.ObjectId(req.userId);
         const user = await User.findById(userId);
-
+        
         if (!user) {
             req.flash('error_msg', 'User not found.');
             return res.redirect('/login');
         }
 
+        await refreshBookmarkedJobs(userId);
+        
         return res.render('profile', {
             activePage: 'profile',
             username: user.username,
@@ -35,16 +38,17 @@ router.get('/', authMiddleware, async (req, res) => {
             emailVerified: user.emailVerified,
             secondaryEmailVerified: user.secondaryEmailVerified,
             phoneVerified: user.phoneVerified,
+            totalBookmarkedJobs: user.savedJobs.length
         });
     } catch (err) {
         console.error('Error fetching user data:', err);
         req.flash('error_msg', 'An error occurred. Please try again.');
-        return res.redirect('/login');
+        return res.redirect('/auth/login');
     }
 });
 
 // Route to edit username
-router.post('/username', authMiddleware, async (req, res) => {
+router.patch('/username', authMiddleware, async (req, res) => {
     const { username } = req.body;
     
     try {
@@ -80,7 +84,7 @@ router.post('/username', authMiddleware, async (req, res) => {
 });
 
 // Route to change password
-router.post('/password', authMiddleware, async (req, res) => {
+router.patch('/password', authMiddleware, async (req, res) => {
     const { currentPassword, newPassword } = req.body;
     
     try {
@@ -126,7 +130,7 @@ router.post('/password', authMiddleware, async (req, res) => {
 });
 
 // Route to add secondary email
-router.post('/email', authMiddleware, async (req, res) => {
+router.patch('/email', authMiddleware, async (req, res) => {
     const { email } = req.body;
     
     try {

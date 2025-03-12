@@ -15,7 +15,7 @@ const resumeRoutes = require('./routes/resumeRoutes');
 const verificationRoutes = require('./routes/verificationRoutes');
 const profileRoutes = require('./routes/profileRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
-const bookmarkRoutes = require('./routes/bookmarkRoutes');
+const { bookmarkRoutes } = require('./routes/bookmarkRoutes');
 
 // Middleware setup
 app.use(cookieParser());
