@@ -117,7 +117,6 @@ function wrongFormatNoData(jobsList) {
         return;
     }
 
-    console.log('jobs is not an array');
     jobsList.innerHTML = '<p>No jobs found.</p>';
     document.querySelector('.pagination-container').innerHTML = '';
 }
@@ -259,12 +258,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Ignore clicks inside elements with class "profile-logout"
         if (event.target.closest('.profile-logout a')) {
-            console.log("Profile or Logout clicked. Skipping event.");
             return; // Do nothing
         }
 
         // Other click event logic here
-        console.log("Clicked outside profile-logout");
     });
 
     /* Check if user's on bookmarks page -- this condition force-executes 

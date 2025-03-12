@@ -78,8 +78,6 @@ async function populateBookmarkedJobs(userId, page) {
             .sort({ _id: -1 }) // Sorting ensures newest jobs appear first (MongoDB default)
             .lean();    // Using lean() for better performance
 
-        console.log(start, end, paginatedJobs.length);
-
         return { jobs: paginatedJobs };
     } catch (err) {
         console.error('Error fetching saved jobs:', err);
@@ -104,7 +102,6 @@ router.get('/jobs', authMiddleware, async (req, res) => {
 
         // Fetch bookmarked jobs
         const { jobs } = await populateBookmarkedJobs(userId, page);
-        // console.log(page, jobs.length, user.savedJobs.length);
         return res.status(200).json({
             jobs,
             currentPage: page,
