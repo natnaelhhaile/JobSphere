@@ -453,41 +453,121 @@ footer {
 
 /******************************* Profile Page *******************************/
 
+/* Profile container - center align and give a modern look */
 .profile-page-list {
-    width: 35%;
-    text-align: center !important;
-}
-
-.d-flex h1 i {
-    font-size: 2rem; /* Adjust icon size */
-    color: #3f3f3f; /* Customize color */
-}
-
-.d-flex h6 {
-    font-size: 1rem; /* Adjust text size */
-    color: #555; /* Customize color */
-}
-
-#loading-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
     width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5);
+    max-width: 500px;
+    text-align: center;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+}
+
+/* Profile header styling */
+.profile-header {
     display: flex;
-    justify-content: center;
     align-items: center;
-    z-index: 1050; /* Ensure it appears on top */
+    justify-content: center;
+    gap: 15px;
+    margin-bottom: 15px;
 }
 
-.spinner-border {
-    width: 3rem;
-    height: 3rem;
+/* Adjust icon size for better responsiveness */
+.profile-header i {
+    font-size: 2.5rem;
+    color: #3f3f3f;
 }
 
-.custom-spinner {
-    color: var(--primary-color) !important;
+.profile-info {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Use CSS Grid for better alignment of labels & values */
+.profile-info .list-group {
+    display: grid;
+    text-align: center;
+    /* Label + Value */
+    grid-template-columns: 1fr; 
+    /* Space between items */
+    gap: 8px 5px; 
+    align-items: center;
+}
+
+/* Ensure labels and values are aligned properly */
+.profile-info .list-group-item {
+    gap: 10px;
+    font-size: 1rem;
+    padding: 8px 12px;
+    white-space: nowrap; /* Prevent labels from breaking */
+}
+
+/* Text adjustments for better readability */
+.profile-info h6 {
+    font-size: 1rem;
+    color: #333;
+    font-weight: bold;
+    /* text-align: left !important; */
+}
+
+.profile-info span {
+    color: #666;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    max-width: 100%;
+}
+
+/* Badge styling for verification status */
+.verified-badge,
+.not-verified-badge {
+    display: inline-block;
+    padding: 5px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    margin-left: 8px;
+    font-weight: bold;
+    color: white;
+    white-space: nowrap;
+}
+
+.verified-badge {
+    background-color: #28a745;
+}
+
+.not-verified-badge {
+    background-color: #ffc107;
+}
+
+/* Profile action buttons */
+.list-group-item {
+    font-size: 1rem;
+    padding: 12px 16px;
+    transition: all 0.2s ease-in-out;
+}
+
+.list-group-item i {
+    color: var(--primary-color);
+}
+
+.list-group-item:hover {
+    background-color: #f1f1f1;
+    transform: translateX(5px);
+}
+
+/* Delete account - make it stand out */
+.text-danger {
+    font-weight: bold;
+}
+
+.text-danger:hover {
+    background-color: rgba(255, 0, 0, 0.1);
 }
 
 /******************************** Home/Landing Pgae ********************************/
@@ -694,5 +774,84 @@ footer {
     .job-filter {
         z-index: 1000; /* Prevents buttons from being covered */
         position: relative;
+    }
+
+    /* Profile Page */
+    
+    .profile-page-list {
+        width: 90%;
+        padding: 15px;
+    }
+
+    .profile-header i {
+        font-size: 1.8rem;
+    }
+
+    .profile-info {
+        padding: 10px;
+        text-align: center !important;
+    }
+
+    .profile-info .list-group {
+        display: block; /* Stack elements on smaller screens */
+        text-align: center !important;
+    }
+
+    .profile-info .list-group-item {
+        flex-direction: column;
+        align-items: flex-start;
+        white-space: normal; /* Allow line breaks on small screens */
+        text-align: center !important;
+    }
+
+    .verified-badge,
+    .not-verified-badge {
+        margin-top: 5px; /* Ensure spacing for mobile */
+    }
+
+    .profile-info h6 {
+        font-size: 0.95rem;
+        text-align: center;
+    }
+
+    .profile-actions {
+        width: 100%;
+    }
+
+    .list-group-item {
+        font-size: 0.95rem;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .list-group-item i {
+        font-size: 1.1rem;
+    }
+
+    /* Center align the back-to-home button */
+    .text-center a {
+        display: block;
+        width: 55%;
+        text-align: center;
+        font-size: 1rem;
+        margin: auto;
+    }
+
+    .modal {
+        /* max-width: 95%; */
+        margin-top: 160px;
+    }
+}
+
+/* Ensure full-width modals */
+@media (max-width: 576px) {
+    .modal {
+        max-width: 95%;
+        margin: 160px 0 0 11.5px;
+    }
+
+    .modal-body {
+        padding: 15px;
     }
 }

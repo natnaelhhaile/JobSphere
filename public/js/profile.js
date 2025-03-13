@@ -17,11 +17,6 @@ const otpToken = document.getElementById('otp-token'); // OTP token hidden input
 const verifyPhoneButton = document.getElementById('verify-phoneNumber'); // Verify phone number button
 let resendCooldown = false; // Cooldown flag for resend OTP to preven spamming
 
-// Hamburger menu toggler in mobile screens
-function toggleMobileMenu() {
-    document.querySelector('.nav-links').classList.toggle('show');
-}
-
 // Handle "Resend OTP" link click
 function disableResendLink(seconds) {
     resendOTPLink.classList.add('disabled');
