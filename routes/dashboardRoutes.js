@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { authMiddleware } = require('../utils/authUtils');
 const { getStoredJobs, searchJobsFromResume } = require('../utils/dbUtils');
+const { refreshBookmarkedJobs } = require('./bookmarkRoutes');
 const User = require('../models/User');
 const Job = require('../models/Job');
 
@@ -9,7 +10,22 @@ const router = express.Router();
 
 // Main dashboard route
 router.get('/', authMiddleware, async (req, res) => {
-    return res.render('dashboard', { activePage: 'dashboard' });
+    try {
+        // Validate userId
+        if (!mongoose.isValidObjectId(req.userId)) {
+            req.flash('error_msg', 'Invalid user ID');
+            return res.render('bookmarks', { activePage: 'bookmarks' });
+        }
+        const userId = new mongoose.Types.ObjectId(req.userId);
+        const user = await User.findById(userId);
+        await refreshBookmarkedJobs(userId);
+
+        return res.render('dashboard', { activePage: 'dashboard', totalBookmarkedJobs: user.savedJobs.length });
+    } catch (error) {
+        console.error(err);
+        req.flash('error_msg', 'An error occurred while fetching your saved jobs.');
+        return res.render('dashboard', { activePage: 'dashboard' });
+    }
 });
 
 // Fetch jobs dynamically for filtering and pagination
@@ -44,20 +60,19 @@ router.get('/jobs', authMiddleware, async (req, res) => {
         const filter = site === 'all' ? { user: userId } : { user: userId, site };
 
         // Fetch stored jobs
-        const { jobs, totalJobs, jobCounts, currentPage } = await getStoredJobs(filter, page);
-        if (jobs && totalJobs > 0 && jobCounts) {
-            return res.status(200).json({ jobs, totalJobs, jobCounts, currentPage, savedJobs: user.savedJobs });
+        const { jobs, totalJobs, jobCounts, jobCountsSum } = await getStoredJobs(filter, page);
+        // Check if the user has stored jobs, if not check for resume data and scrape jobs from their resume data
+        if (jobCountsSum > 0) {
+                return res.status(200).json({ jobs, totalJobs, jobCounts, savedJobs: user.savedJobs, jobCountsSum });
         } else if (hasResume) {
-            // Scrape jobs if the user has a resume but no stored jobs
             await searchJobsFromResume(user.resume, userId);
-            // Fetch stored jobs
-            const { jobs, totalJobs, jobCounts, currentPage } = await getStoredJobs(filter, page);
-            return res.status(200).json({ jobs, totalJobs, jobCounts, currentPage, savedJobs: user.savedJobs });
+            const { jobs, totalJobs, jobCounts, jobCountsSum } = await getStoredJobs(filter, page);
+            return res.status(200).json({ jobs, totalJobs, jobCounts, savedJobs: user.savedJobs, jobCountsSum });
         } else {
             return res.status(200).json({
                 type: 'danger',
                 message: 'No resume data found!',
-                jobs, totalJobs, jobCounts, currentPage, savedJobs: [] 
+                jobs, totalJobs, jobCounts, savedJobs: [], jobCountsSum
             });
         }
     } catch (error) {
@@ -74,8 +89,8 @@ router.get('/jobs', authMiddleware, async (req, res) => {
                 ziprecruiter: 0,
                 google: 0,
             },
-            currentPage: 1,
-            savedJobs: [] 
+            savedJobs: [], 
+            jobCountsSum: 0
         });
     }
 });

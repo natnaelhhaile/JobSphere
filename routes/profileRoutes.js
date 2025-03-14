@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const config = require('../config/configEnv'); // Centralized configuration
 const { authMiddleware } = require('../utils/authUtils');
 const { generateVerificationToken, sendVerificationEmail, sendOTPToPhone } = require('../utils/verificationUtils');
+const { refreshBookmarkedJobs } = require('./bookmarkRoutes');
 const User = require('../models/User');
 const Job = require('../models/Job');
 
@@ -20,12 +21,14 @@ router.get('/', authMiddleware, async (req, res) => {
         }
         const userId = new mongoose.Types.ObjectId(req.userId);
         const user = await User.findById(userId);
-
+        
         if (!user) {
             req.flash('error_msg', 'User not found.');
             return res.redirect('/login');
         }
 
+        await refreshBookmarkedJobs(userId);
+        
         return res.render('profile', {
             activePage: 'profile',
             username: user.username,
@@ -35,16 +38,17 @@ router.get('/', authMiddleware, async (req, res) => {
             emailVerified: user.emailVerified,
             secondaryEmailVerified: user.secondaryEmailVerified,
             phoneVerified: user.phoneVerified,
+            totalBookmarkedJobs: user.savedJobs.length
         });
     } catch (err) {
         console.error('Error fetching user data:', err);
         req.flash('error_msg', 'An error occurred. Please try again.');
-        return res.redirect('/login');
+        return res.redirect('/auth/login');
     }
 });
 
 // Route to edit username
-router.post('/edit-username', authMiddleware, async (req, res) => {
+router.patch('/username', authMiddleware, async (req, res) => {
     const { username } = req.body;
     
     try {
@@ -80,7 +84,7 @@ router.post('/edit-username', authMiddleware, async (req, res) => {
 });
 
 // Route to change password
-router.post('/change-password', authMiddleware, async (req, res) => {
+router.patch('/password', authMiddleware, async (req, res) => {
     const { currentPassword, newPassword } = req.body;
     
     try {
@@ -126,7 +130,7 @@ router.post('/change-password', authMiddleware, async (req, res) => {
 });
 
 // Route to add secondary email
-router.post('/add-email', authMiddleware, async (req, res) => {
+router.patch('/email', authMiddleware, async (req, res) => {
     const { email } = req.body;
     
     try {
@@ -172,36 +176,8 @@ router.post('/add-email', authMiddleware, async (req, res) => {
     }
 });
 
-// Route to verify email
-router.get('/verify-email', async (req, res) => {
-    const { token } = req.query;
-    try {
-        const decoded = jwt.verify(token, config.JWT_SECRET);
-        const user = await User.findOne({ $or: [{ email: decoded.email }, { secondaryEmail: decoded.email }] });
-
-        if (!user) {
-            req.flash('error_msg', 'User not found. Email verification failed!');
-            return res.redirect('/login');
-        }
-
-        if (user.secondaryEmail === decoded.email) {
-            user.secondaryEmailVerified = true;
-        } else {
-            user.emailVerified = true;
-        }
-
-        await user.save();
-        req.flash('success_msg', 'Email verified successfully!');
-        return res.redirect('/profile');
-    } catch (err) {
-        console.error('Error verifying email:', err);
-        req.flash('error_msg', 'Email verification failed!');
-        return res.redirect('/login');
-    }
-});
-
 // Route to add phone number
-router.post('/add-phone', authMiddleware, async (req, res) => {
+router.patch('/phone', authMiddleware, async (req, res) => {
     const { phone } = req.body;
     const phoneNumber = `+1${phone}`;
 
@@ -218,46 +194,8 @@ router.post('/add-phone', authMiddleware, async (req, res) => {
     }
 });
 
-// Route to verify phone number
-router.post('/verify-phone', authMiddleware, async (req, res) => {
-    const { otp, token } = req.body;
-    
-    try {
-        // Validate userId
-        if (!mongoose.isValidObjectId(req.userId)) {
-            return res.status(400).json({ 
-                type: 'danger', 
-                message: "Invalid user ID" 
-            });
-        }
-        const userId = new mongoose.Types.ObjectId(req.userId);
-        const decoded = jwt.verify(token, config.JWT_SECRET);
-        if (decoded.otp !== otp) {
-            return res.status(400).json({
-                type: 'danger',
-                message: 'Incorrect OTP! Phone verification failed!',
-            });
-        }
-
-        const user = await User.findById(userId);
-        user.phoneNumber = decoded.phoneNumber;
-        user.phoneVerified = true;
-        await user.save();
-        return res.status(200).json({ 
-            type: 'success', 
-            message: 'Phone number verified successfully!' 
-        });
-    } catch (err) {
-        console.error('Error verifying phone number:', err);
-        return res.status(500).json({
-            type: 'danger',
-            message: 'Error verifying phone number. Please try again.',
-        });
-    }
-});
-
 // Route to delete account
-router.post('/delete-account', authMiddleware, async (req, res) => {
+router.delete('/DELETE', authMiddleware, async (req, res) => {
     const { password } = req.body;
     
     try {

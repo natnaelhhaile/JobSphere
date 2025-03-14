@@ -1,7 +1,3 @@
-function toggleMobileMenu() {
-    document.querySelector('.nav-links').classList.toggle('show');
-}
-
 function fixUnclosedTags(description) {
     // Handle empty/non-string input
     if (typeof(description) !== 'string' || !description.trim()) return '';
@@ -39,11 +35,10 @@ function renderPagination(totalSavedJobs, currentPage) {
 // Function to render jobs based on the current filter and page
 function renderJobs(jobs, currentPage, savedJobs) {
     const jobsList = document.getElementById('jobs-list');
-    const noJobsMsg = document.getElementById('no-jobs-msg');
+    const noBookmarkedJobsMsg = document.getElementById('no-bookmarked-jobs-msg');
     const paginationContainer = document.querySelector('.pagination-container');
-    const bookmarkNumbersHeader = document.querySelector('.bookmark-numbers');
 
-    if (!jobsList || !noJobsMsg || !paginationContainer) {
+    if (!jobsList || !noBookmarkedJobsMsg || !paginationContainer) {
         console.error("One or more required elements not found.");
         return;
     }
@@ -53,8 +48,7 @@ function renderJobs(jobs, currentPage, savedJobs) {
             // No saved jobs at all
             jobsList.innerHTML = '';
             paginationContainer.innerHTML = '';
-            bookmarkNumbersHeader.innerHTML = '0';
-            noJobsMsg.style.display = 'block';
+            noBookmarkedJobsMsg.style.display = 'block';
             return;
         }
     
@@ -66,8 +60,7 @@ function renderJobs(jobs, currentPage, savedJobs) {
     }
     
     jobsList.innerHTML = ''; // Clear previous content
-    bookmarkNumbersHeader.textContent = savedJobs.length;
-    noJobsMsg.style.display = 'none';
+    noBookmarkedJobsMsg.style.display = 'none';
 
     const fragment = document.createDocumentFragment();
 
@@ -120,7 +113,6 @@ function wrongFormatNoData(jobsList) {
         return;
     }
 
-    console.log('jobs is not an array');
     jobsList.innerHTML = '<p>No jobs found.</p>';
     document.querySelector('.pagination-container').innerHTML = '';
 }
@@ -203,6 +195,7 @@ function fadeOutAlert(alertElement) {
 // Toggle bookmark helper function
 async function toggleBookmark(jobId, button) {
     try {
+        const bookmarksPageCounter = document.getElementById('bookmarksCounter');
         const response = await fetch('/bookmarks/toggle', {
             method: 'POST',
             headers: {'Content-Type': 'Application/JSON'},
@@ -236,6 +229,16 @@ async function toggleBookmark(jobId, button) {
         // Fetch updated job list
         await fetchJobs(currentPage);
 
+        // Update the bookmarks navbar counter pill/badge
+        if (!bookmarksPageCounter) {
+            console.warn('Bookmarks page navbar counter badge not found!')
+            return;
+        } else {
+                result.totalBookmarkedJobs === 0 ? bookmarksPageCounter.textContent = '' :
+                bookmarksPageCounter.textContent = result.totalBookmarkedJobs;
+            return;
+        }
+
     } catch (err) {
         console.error('Error toggling bookmark:', err);
         // Todo: redesign #flash-messages to show error or success messages on the dashboard page without Express-flash
@@ -251,12 +254,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Ignore clicks inside elements with class "profile-logout"
         if (event.target.closest('.profile-logout a')) {
-            console.log("Profile or Logout clicked. Skipping event.");
             return; // Do nothing
         }
 
         // Other click event logic here
-        console.log("Clicked outside profile-logout");
     });
 
     /* Check if user's on bookmarks page -- this condition force-executes 
@@ -277,7 +278,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (button) {
             event.preventDefault();
             const jobId = button.dataset.id;
-            await toggleBookmark(jobId, button)
+            await toggleBookmark(jobId, button);
         }
     });
 });

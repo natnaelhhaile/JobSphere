@@ -1,7 +1,3 @@
-function toggleMobileMenu() {
-    document.querySelector('.nav-links').classList.toggle('show');
-}
-
 function fixUnclosedTags(description) {
     // Handle empty/non-string input
     if (typeof(description) !== 'string' || !description.trim()) return '';
@@ -18,9 +14,8 @@ function fixUnclosedTags(description) {
 
 // Filter jobs when a button is clicked
 function filterJobs(site) {
-    currentPage = 1; // Reset to the first page
     
-    const filterButtons = document.querySelectorAll('.job-filter.btn');
+    const filterButtons = document.querySelectorAll('.job-filter .btn');
     if (!filterButtons) {
         console.error('No filter buttons found.');
         return;
@@ -36,7 +31,8 @@ function filterJobs(site) {
             console.warn(`Filter button for '${site}' not found.`);
         }
     });
-    fetchJobs(site, currentPage); // Re-render jobs
+
+    fetchJobs(site); // Re-render jobs
 }
 
 function updateFilterButtons(jobCounts) {
@@ -50,14 +46,14 @@ function updateFilterButtons(jobCounts) {
                 return;
             }
             // Find the count and update it
-            countElement.textContent = ` (${jobCounts[site] || 0})`;
+            countElement.textContent = ` ${jobCounts[site] || 0}`;
         } else {
             console.warn(`Filter button for '${site}' not found.`);
         }
     });
 
     const totalCount = Object.values(jobCounts).reduce((total, count) => total + count, 0);
-    document.querySelector('.btn-all .site-count').textContent = ` (${totalCount})`;
+    document.querySelector('.btn-all .site-count').textContent = ` ${totalCount}`;
 }
 
 
@@ -82,25 +78,34 @@ function renderPagination(filter, totalJobs, currentPage) {
 }
 
 // Function to render jobs based on the current filter and page
-function renderJobs(filter, jobs, currentPage, totalJobs, savedJobs, jobCounts) {
+function renderJobs(filter, jobs, currentPage, totalJobs, savedJobs, jobCounts, jobCountsSum) {
     const jobsList = document.getElementById('jobs-list');
-    const noJobsMsg = document.getElementById('no-jobs-msg');
+    const noUserJobsMsg = document.getElementById('no-user-jobs-msg');
+    const noFilteredJobsMsg = document.getElementById('no-filtered-jobs-msg');
     const paginationContainer = document.querySelector('.pagination-container');
 
-    if (!jobsList || !noJobsMsg || !paginationContainer) {
+    if (!jobsList || !noUserJobsMsg || !noFilteredJobsMsg || !paginationContainer) {
         console.error("One or more required elements not found.");
         return;
     }
 
     if (totalJobs === 0 || jobs.length === 0) {
-        jobsList.innerHTML = '';
-        paginationContainer.innerHTML = '';
-        noJobsMsg.style.display = 'block';
-        return;
+        if (jobCountsSum === 0) {
+            jobsList.innerHTML = '';
+            paginationContainer.innerHTML = '';
+            noUserJobsMsg.style.display = 'block';
+            return;
+        } else if (jobCountsSum > 0) {
+            jobsList.innerHTML = '';
+            paginationContainer.innerHTML = '';
+            noFilteredJobsMsg.style.display = 'block';
+            return;
+        }
     }
 
     jobsList.innerHTML = ''; // Clear previous content
-    noJobsMsg.style.display = 'none';
+    noUserJobsMsg.style.display = 'none';
+    noFilteredJobsMsg.style.display = 'none';
 
     const fragment = document.createDocumentFragment();
 
@@ -176,18 +181,12 @@ async function fetchJobs(filter = 'all', page = 1) {
 
         const data = await response.json();
 
-        if (data.jobs && Array.isArray(data.jobs)) {
-            currentPage = page
-            // Render fetched jobs
-            renderJobs(filter, data.jobs, currentPage, data.totalJobs, data.savedJobs, data.jobCounts);
-        } else {
-            jobsList.innerHTML = '<p>No jobs found.</p>';
-            document.querySelector('.pagination-container').innerHTML = '';
-        }
+        currentPage = page
+        // Render fetched jobs
+        renderJobs(filter, data.jobs, currentPage, data.totalJobs, data.savedJobs, data.jobCounts, data.jobCountsSum);
 
     } catch (err) {
         console.error('Error fetching jobs:', err);
-        jobsList.innerHTML = `<p style="color: red;">${err.message || "An unexpected error occurred. Please try again later."}</p>`;
     } finally {
         // Hide loading overlay
         loadingOverlay.style.display = 'none';
@@ -218,6 +217,7 @@ function fadeOutAlert(alertElement) {
 // Toggle bookmark helper function
 async function toggleBookmark(jobId, button) {
     try {
+        const bookmarksPageCounter = document.getElementById('bookmarksCounter');
         const response = await fetch('/bookmarks/toggle', {
             method: 'POST',
             headers: {'Content-Type': 'Application/JSON'},
@@ -230,13 +230,24 @@ async function toggleBookmark(jobId, button) {
 
         const result = await response.json();
 
-            // toggle UI based on new bookmark status
-            const icon = button.querySelector('i');
-            if (result.saved) {
-                icon.classList.replace('fa-regular', 'fa-solid');
-            } else {
-                icon.classList.replace('fa-solid', 'fa-regular');
-            }
+        // toggle UI based on new bookmark status
+        const icon = button.querySelector('i');
+        if (result.saved) {
+            icon.classList.replace('fa-regular', 'fa-solid');
+        } else {
+            icon.classList.replace('fa-solid', 'fa-regular');
+        }
+
+        // Update the bookmarks navbar counter pill/badge
+        if (!bookmarksPageCounter) {
+            console.warn('Bookmarks page navbar counter badge not found!')
+            return;
+        } else {
+            result.totalBookmarkedJobs === 0 ? bookmarksPageCounter.textContent = '' :
+            bookmarksPageCounter.textContent = result.totalBookmarkedJobs;
+            return;
+        }
+
     } catch (err) {
         console.error('Error toggling bookmark:', err);
         // Todo: redesign #flash-messages to show error or success messages on the dashboard page without Express-flash
@@ -251,12 +262,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Ignore clicks inside elements with class "profile-logout"
         if (event.target.closest('.profile-logout a')) {
-            console.log("Profile or Logout clicked. Skipping event.");
             return; // Do nothing
         }
 
         // Other click event logic here
-        console.log("Clicked outside profile-logout");
     });
 
     /* Check if user's on dashboard -- this condition force-executes 
@@ -277,7 +286,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (button) {
             event.preventDefault();
             const jobId = button.dataset.id;
-            await toggleBookmark(jobId, button)
+            await toggleBookmark(jobId, button);
         }
     });
 });

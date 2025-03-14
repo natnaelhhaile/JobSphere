@@ -15,9 +15,10 @@ router.get('/', authMiddleware, async (req, res) => {
             return res.render('bookmarks', { activePage: 'bookmarks' });
         }
         const userId = new mongoose.Types.ObjectId(req.userId);
+        const user = await User.findById(userId);
         await refreshBookmarkedJobs(userId);
 
-        return res.render('bookmarks', { activePage: 'bookmarks' });
+        return res.render('bookmarks', { activePage: 'bookmarks', totalBookmarkedJobs: user.savedJobs.length });
     } catch (error) {
         console.error(err);
         req.flash('error_msg', 'An error occurred while fetching your saved jobs.');
@@ -70,19 +71,12 @@ async function populateBookmarkedJobs(userId, page) {
         // Convert job IDs to ObjectId if needed
         const objectIdJobIds = paginatedJobIds.map(id =>
             mongoose.Types.ObjectId.isValid(id) ? new mongoose.Types.ObjectId(id) : null)
-            .filter(id => id !== null); // Remove nulls
-
-        console.log(`Raw Job IDs:`, paginatedJobIds);
-        console.log(`Converted ObjectId Job IDs:`, objectIdJobIds);
-        console.log(`Executing query:`, { _id: { $in: objectIdJobIds } });
-            
+            .filter(id => id !== null); // Remove nulls            
 
         // Fetch only the jobs that match the paginated IDs, ensuring order is preserved
         const paginatedJobs = await Job.find({ _id: { $in: objectIdJobIds } })
             .sort({ _id: -1 }) // Sorting ensures newest jobs appear first (MongoDB default)
             .lean();    // Using lean() for better performance
-
-        console.log(start, end, paginatedJobs.length);
 
         return { jobs: paginatedJobs };
     } catch (err) {
@@ -108,7 +102,6 @@ router.get('/jobs', authMiddleware, async (req, res) => {
 
         // Fetch bookmarked jobs
         const { jobs } = await populateBookmarkedJobs(userId, page);
-        // console.log(page, jobs.length, user.savedJobs.length);
         return res.status(200).json({
             jobs,
             currentPage: page,
@@ -161,11 +154,15 @@ router.post('/toggle', authMiddleware, async (req, res) => {
         }
         await user.save();
 
+        // refresh the bookmarked jobs list in database
+        await refreshBookmarkedJobs(userId);
+
         return res.status(200).json({ 
             type: 'success',
             message: saved ? 'Job bookmarked successfully!' : 'Job removed from bookmarks!', 
             saved,
-            currentPage: page
+            currentPage: page,
+            totalBookmarkedJobs: user.savedJobs.length
         });
     } catch (error) {
         console.error('Error toggling bookmark:', error);
@@ -173,9 +170,10 @@ router.post('/toggle', authMiddleware, async (req, res) => {
             type: 'danger',
             message: 'Internal server error',
             saved: false,
-            currentPage: 1
+            currentPage: 1,
+            totalBookmarkedJobs: 0
         });
     }
 });
 
-module.exports = router;
+module.exports = { bookmarkRoutes: router, refreshBookmarkedJobs };
