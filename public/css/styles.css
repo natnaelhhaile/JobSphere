@@ -497,6 +497,10 @@ footer {
     color: #3f3f3f;
 }
 
+.profile-photo-social {
+    border-radius: 20%;
+}
+
 .profile-info {
     background-color: #f8f9fa;
     padding: 15px;
@@ -799,6 +803,10 @@ footer {
 
     .job-item {
         width: 95% !important;
+    }
+
+    .job-action-buttons .btn{
+        margin-bottom: 5px !important;
     }
 
     /* Job filter buttons by site */

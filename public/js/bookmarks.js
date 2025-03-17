@@ -86,7 +86,7 @@ function renderJobs(jobs, currentPage, savedJobs) {
                         : 'Not specified'
                 }</p>
                 <p class="remote-status"><strong>Remote:</strong> ${job.is_remote ? 'Yes' : 'No'}</p>
-                <div class="text-center">
+                <div class="text-center job-action-buttons">
                     <button data-id="${job._id}" class="btn btn-1 bookmark-btn"><i class="${
                         (savedJobs && Array.isArray(savedJobs)) ?
                             (savedJobs.includes(job._id) ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark') :

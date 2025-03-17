@@ -22,9 +22,13 @@
         <div class="container profile-page-list my-5">
             <!-- Profile Header -->
             <div class="profile-header">
-                <h1 class="text-center mb-0">
-                    <i class="fa-solid fa-user"></i>
-                </h1>
+                <% if (!isSocialLogin) { %>
+                    <h1 class="text-center mb-0">
+                        <i class="fa-solid fa-user"></i>
+                    </h1>
+                <% } else { %>
+                    <img src="<%= profilePhoto %>" class="profile-photo-social">
+                <% } %>
             </div>
 
             <!-- Profile Info Section -->

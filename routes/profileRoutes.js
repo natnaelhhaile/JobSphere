@@ -38,7 +38,9 @@ router.get('/', authMiddleware, async (req, res) => {
             emailVerified: user.emailVerified,
             secondaryEmailVerified: user.secondaryEmailVerified,
             phoneVerified: user.phoneVerified,
-            totalBookmarkedJobs: user.savedJobs.length
+            totalBookmarkedJobs: user.savedJobs.length,
+            isSocialLogin: user.isSocialLogin,
+            profilePhoto: user.profilePicture,
         });
     } catch (err) {
         console.error('Error fetching user data:', err);

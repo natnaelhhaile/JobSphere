@@ -97,7 +97,7 @@ function renderJobs(filter, jobs, currentPage, totalJobs, savedJobs, jobCounts, 
             if (window.innerWidth < 768) {
                 document.querySelector('.job-filter.btn-group').style.display = 'none';
             } else {
-                document.querySelector('.job-filter.btn-group').style.display = 'block';
+                document.querySelector('.job-filter.btn-group').style.display = 'flex';
             }
             return;
         } else if (jobCountsSum > 0) {
@@ -136,7 +136,7 @@ function renderJobs(filter, jobs, currentPage, totalJobs, savedJobs, jobCounts, 
                         : 'Not specified'
                 }</p>
                 <p class="remote-status"><strong>Remote:</strong> ${job.is_remote ? 'Yes' : 'No'}</p>
-                <div class="text-center">
+                <div class="text-center job-action-buttons">
                     <button data-id="${job._id}" class="btn btn-1 bookmark-btn"><i class="${
                         savedJobs.includes(job._id) ? 'fa-solid fa-bookmark' : 'fa-regular fa-bookmark'
                     }"></i></button>
