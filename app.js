@@ -4,8 +4,7 @@ const path = require('path');
 const cookieParser = require('cookie-parser');
 const expressSession = require('express-session');
 const flash = require('connect-flash');
-const passport = require('passport');
-require('./config/passportConfig'); // Passport configuration
+const passport = require('./config/passportConfig'); // Passport configuration
 const config = require('./config/configEnv'); // Centralized configuration
 const app = express();
 
@@ -21,6 +20,9 @@ const { bookmarkRoutes } = require('./routes/bookmarkRoutes');
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
+
+// Passport middleware
+app.use(passport.initialize());
 
 // Set up express-session for flash messages
 app.use(expressSession({

@@ -14,7 +14,7 @@ router.get('/', authMiddleware, async (req, res) => {
         // Validate userId
         if (!mongoose.isValidObjectId(req.userId)) {
             req.flash('error_msg', 'Invalid user ID');
-            return res.render('bookmarks', { activePage: 'bookmarks' });
+            return res.render('dashboard', { activePage: 'dashboard' });
         }
         const userId = new mongoose.Types.ObjectId(req.userId);
         const user = await User.findById(userId);
@@ -106,12 +106,16 @@ router.get('/jobs/:id', authMiddleware, async (req, res) => {
         const jobId = new mongoose.Types.ObjectId(req.params.id);
         const job = await Job.findById(jobId);
 
+        const userId = new mongoose.Types.ObjectId(req.userId);
+        const user = await User.findById(userId);
+        await refreshBookmarkedJobs(userId);
+
         if (!job) {
             req.flash('error_msg', 'Job not found');
             return res.redirect('/dashboard');
         }
 
-        return res.render('jobPost', { job });
+        return res.render('jobPost', { job, activePage: 'dashboard', totalBookmarkedJobs: user.savedJobs.length });
     } catch (err) {
         console.error(err);
         req.flash('error_msg', 'An error occurred while fetching the job');

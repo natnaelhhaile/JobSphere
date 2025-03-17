@@ -50,11 +50,13 @@ a.disabled {
     border-color: var(--primary-color) !important;
     background-color: transparent !important;
     color: var(--primary-color) !important;
+    font-size: large;
 }
 
 .btn-2:hover {
     background-color: var(--primary-color) !important;
     color: #fff !important;
+    font-size: large;
 }
 
 /******** project-wide success and error alerts *********/
@@ -237,14 +239,32 @@ footer {
     width: 40% !important;
 }
 
+.or-social-login-text {
+    text-align: center;
+}
+
 .logon-img {
     width: 150px;
     height: 100px;
 }
 
+.logon-form form {
+    text-align: center !important;
+}
+
 .btn-facebook {
     background-color: #1877F2 !important;
     color: white;
+}
+
+.logon-form .social-logons a{
+    /* width: 100%; */
+    margin-bottom: 10px;
+}
+
+.btn-google:hover, .btn-facebook:hover {
+    color: white;
+    font-size: large;
 }
 
 /******************************* Dashboard Styling *******************************/
@@ -467,9 +487,6 @@ footer {
 
 /* Profile header styling */
 .profile-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     gap: 15px;
     margin-bottom: 15px;
 }
@@ -483,22 +500,18 @@ footer {
 .profile-info {
     background-color: #f8f9fa;
     padding: 15px;
-    border-radius: 8px;
-    text-align: left;
-    display: flex;
-    flex-direction: column;
+    border-radius: 20px;
     gap: 10px;
 }
 
 /* Use CSS Grid for better alignment of labels & values */
 .profile-info .list-group {
-    display: grid;
-    text-align: center;
+    /* display: grid; */
+    /* text-align: center; */
     /* Label + Value */
-    grid-template-columns: 1fr; 
+    /* grid-template-columns: 1fr;  */
     /* Space between items */
     gap: 8px 5px; 
-    align-items: center;
 }
 
 /* Ensure labels and values are aligned properly */
@@ -514,7 +527,6 @@ footer {
     font-size: 1rem;
     color: #333;
     font-weight: bold;
-    /* text-align: left !important; */
 }
 
 .profile-info span {
@@ -675,6 +687,12 @@ footer {
     color: #7f8c8d;
 }
 
+/* Home page/ Landing page */
+.signup-btns-homepage a{
+    /* margin-bottom: 10px !important; */
+    margin: 10px auto !important;
+}
+
 /********************************* jobPost Page *********************************/
 
 .card-body {
@@ -690,7 +708,8 @@ footer {
 
     /* Home page/ Landing page */
     .signup-btns-homepage a{
-        margin-bottom: 40px;
+        /* margin-bottom: 10px !important; */
+        margin: 10px auto !important;
     }
 
     /* Header Page */
@@ -752,6 +771,29 @@ footer {
         background-color: var(--primary-color); /* Keep consistent background */
         transition: none; /* Prevent movement */
     }
+
+    /* Login/Signup Pages */
+
+    .logon-form {
+        width: 70% !important;
+    }
+
+    .logon-form .submit-button {
+        width: 60% !important;
+    }
+
+    .logon-form form {
+        text-align: center !important;
+    }
+
+    .logon-form .or-social-login-text {
+        text-align: center;
+    }
+
+    .logon-form .social-logons a{
+        width: 100%;
+        margin-bottom: 10px;
+    }
     
     /* Dashboard/Bookmarks Page -- Job Lists */
 
@@ -789,19 +831,16 @@ footer {
 
     .profile-info {
         padding: 10px;
-        text-align: center !important;
     }
 
     .profile-info .list-group {
         display: block; /* Stack elements on smaller screens */
-        text-align: center !important;
     }
 
     .profile-info .list-group-item {
         flex-direction: column;
         align-items: flex-start;
         white-space: normal; /* Allow line breaks on small screens */
-        text-align: center !important;
     }
 
     .verified-badge,
@@ -811,7 +850,6 @@ footer {
 
     .profile-info h6 {
         font-size: 0.95rem;
-        text-align: center;
     }
 
     .profile-actions {
@@ -821,8 +859,6 @@ footer {
     .list-group-item {
         font-size: 0.95rem;
         padding: 10px;
-        display: flex;
-        justify-content: space-between;
     }
 
     .list-group-item i {
