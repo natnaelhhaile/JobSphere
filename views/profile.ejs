@@ -32,13 +32,15 @@
                 <ul class="list-group list-group-flush">
                     <li class="list-group-item">
                         <h6>Username</h6>
-                        <span><%= username %></span>
+                        <span class="profile-info-username"><%= username %></span>
                     </li>
 
                     <li class="list-group-item">
                         <h6>Email</h6>
                         <span>
-                            <%= email %>
+                            <span class="class="profile-info-email">
+                                <%= email %>
+                            </span>
                             <% if (emailVerified) { %>
                                 <span class="verified-badge">Verified</span>
                             <% } else { %>
@@ -51,7 +53,9 @@
                         <li class="list-group-item">
                             <h6>Secondary&nbsp;Email</h6>
                             <span>
-                                <%= secondaryEmail %>
+                                <span class="class="profile-info-sec-email">
+                                    <%= secondaryEmail %>
+                                </span>
                                 <% if (secondaryEmailVerified) { %>
                                     <span class="verified-badge">Verified</span>
                                 <% } else { %>
@@ -124,7 +128,7 @@
         <div class="modal fade" id="editUsernameModal" tabindex="-1" aria-labelledby="editUsernameModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form action="/profile/edit-username" method="POST" id="editUsernameForm">
+                    <form action="/profile/username" method="PATCH" id="editUsernameForm">
                         <div class="modal-header">
                             <h5 class="modal-title" id="editUsernameModalLabel">Edit Your Username</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -148,7 +152,7 @@
         <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form id="changePasswordForm" action="/profile/change-password" method="POST">
+                    <form id="changePasswordForm" action="/profile/password" method="PATCH">
                         <div class="modal-header">
                             <h5 class="modal-title" id="changePasswordModalLabel">Change Password</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -176,7 +180,7 @@
         <div class="modal fade" id="addEmailModal" tabindex="-1" aria-labelledby="addEmailModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form id="addEmailForm" action="/profile/add-email" method="POST">
+                    <form id="addEmailForm" action="/profile/email" method="PATCH">
                         <div class="modal-header">
                             <h5 class="modal-title" id="addEmailModalLabel">Add a Second Email</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -201,7 +205,7 @@
         <div class="modal fade" id="addPhoneModal" tabindex="-1" aria-labelledby="addPhoneModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <form id="addPhoneForm" action="/profile/add-phone" method="POST">
+                    <form id="addPhoneForm" action="/profile/phone" method="PATCH">
                         <div class="modal-header">
                             <h5 class="modal-title" id="addPhoneModalLabel">Add Phone Number</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -286,7 +290,7 @@
                     </form>
     
                     <!-- Secondary Step for Password Authentication -->
-                    <form id="deleteAccountStep2" class="d-none" action="/profile/delete-account" method="POST">
+                    <form id="deleteAccountStep2" class="d-none" action="/profile/DELETE" method="DELETE">
                         <div class="modal-header">
                             <h5 class="modal-title">Confirm Deletion</h5>
                             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

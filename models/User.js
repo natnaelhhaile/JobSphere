@@ -3,14 +3,21 @@ const mongoose = require('mongoose');
 // Define the User schema
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true, unique: true },
-    email: { type: String, required: true, unique: true, match: [/.+\@.+\..+/, 'Please enter a valid email address'] },
+    email: { 
+        type: String, 
+        required: function () {
+            return !this.isSocialLogin; // Email is required only if not a social login
+        }, 
+        unique: true, 
+        match: [/.+\@.+\..+/, 'Please enter a valid email address'] 
+    },
     secondaryEmail: {type: String},
     phoneNumber: {type: String},
     password: { 
         type: String, 
         required: function () {
             return !this.isSocialLogin; // Password is required only if not a social login
-        } 
+        }
     },
     isSocialLogin: { type: Boolean, default: false },
     resume: { 
@@ -38,6 +45,9 @@ const userSchema = new mongoose.Schema({
     phoneVerified: { type: Boolean, default: false },
     emailVerified: { type: Boolean, default: false },
     secondaryEmailVerified: { type: Boolean, default: false },
+    googleId: { type: String, unique: true },
+    facebookId: { type: String, unique: true },
+    profilePicture: { type: String },
     savedJobs: [{ 
         type: mongoose.Schema.Types.ObjectId, 
         ref: 'Job' 

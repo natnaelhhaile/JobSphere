@@ -111,12 +111,14 @@ const handleFormSubmission = async (endpoint, method, formData, options = {}) =>
             showFlashMessage(data.type, data.message);
         }
 
-        if (response.ok && data.username) {
-            // Update the username dynamically if provided in the response
-            const usernameElement = document.querySelector('.profile-page-list h6.mb-0');
-            if (usernameElement) {
-                usernameElement.textContent = data.username;
-            }
+        if (data.username) {
+            const username = document.querySelector('.profile-info-username');
+            username.textContent = data.username;
+        }
+
+        if (data.secondaryEmail) {
+            const secondEmail = document.querySelector('.profile-info-sec-email');
+            secondEmail.textContent = data.secondaryEmail;
         }
 
         // Redirect if needed
@@ -159,7 +161,7 @@ const formsConfig = [
     { formId: 'addEmailForm', modalId: 'addEmailModal', endpoint: '/profile/email', method: 'PATCH', fields: ['email'], redirectAfter: false },
     { formId: 'addPhoneForm', modalId: 'addPhoneModal', endpoint: '/profile/phone', method: 'PATCH', fields: ['phone'], redirectAfter: false },
     { formId: 'deleteAccountForm', modalId: 'deleteAccountModal', endpoint: '/profile/DELETE', method: 'DELETE', fields: ['password'], redirectAfter: '/' },
-    { formId: 'uploadResumeForm', modalId: 'uploadResumeModal', endpoint: '/resume', method: 'POST', isFileUpload: true, redirectAfter: false },
+    { formId: 'uploadResumeForm', modalId: 'uploadResumeModal', endpoint: '/resume/upload', method: 'POST', isFileUpload: true, redirectAfter: false },
 ];
 
 

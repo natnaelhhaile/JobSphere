@@ -49,8 +49,8 @@ router.get('/', authMiddleware, async (req, res) => {
 
 // Route to edit username
 router.patch('/username', authMiddleware, async (req, res) => {
-    const { username } = req.body;
-    
+    let { username } = req.body;
+    username = username.toLowerCase()
     try {
         // Validate userId
         if (!mongoose.isValidObjectId(req.userId)) {
@@ -60,6 +60,13 @@ router.patch('/username', authMiddleware, async (req, res) => {
             });
         }
         const userId = new mongoose.Types.ObjectId(req.userId);
+        const user = await User.findById(userId);
+        if (user.username === username) {
+            return res.status(400).json({
+                type: 'danger',
+                message: 'That is your current username. Please choose a different one.',
+            });
+        }
         const existingUser = await User.findOne({ username });
         if (existingUser) {
             return res.status(400).json({
@@ -68,7 +75,8 @@ router.patch('/username', authMiddleware, async (req, res) => {
             });
         }
 
-        const user = await User.findByIdAndUpdate(userId, { username }, { new: true });
+        user.username = username;
+        await user.save();
         return res.status(200).json({
             type: 'success',
             message: 'Username updated successfully!',
@@ -159,13 +167,22 @@ router.patch('/email', authMiddleware, async (req, res) => {
             });
         }
 
-        await User.findByIdAndUpdate(userId, { secondaryEmail: email });
+        // await User.findByIdAndUpdate(userId, { secondaryEmail: email });
+        user.secondaryEmail = email;
+        await user.save();
         const token = generateVerificationToken(email);
         await sendVerificationEmail(email, token);
 
         return res.status(200).json([
-            { type: 'success', message: 'Secondary email added successfully!' },
-            { type: 'info', message: 'A verification email has been sent to your secondary email! Please verify your email.' },
+            { 
+                type: 'success', 
+                message: 'Secondary email added successfully!' ,
+                secondaryEmail: email,
+            },
+            { 
+                type: 'info', 
+                message: 'A verification email has been sent to your secondary email! Please verify your email.' 
+            },
         ]);
     } catch (err) {
         console.error('Error adding secondary email:', err);

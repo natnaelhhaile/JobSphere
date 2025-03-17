@@ -94,6 +94,11 @@ function renderJobs(filter, jobs, currentPage, totalJobs, savedJobs, jobCounts, 
             jobsList.innerHTML = '';
             paginationContainer.innerHTML = '';
             noUserJobsMsg.style.display = 'block';
+            if (window.innerWidth < 768) {
+                document.querySelector('.job-filter.btn-group').style.display = 'none';
+            } else {
+                document.querySelector('.job-filter.btn-group').style.display = 'block';
+            }
             return;
         } else if (jobCountsSum > 0) {
             jobsList.innerHTML = '';
