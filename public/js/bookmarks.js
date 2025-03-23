@@ -253,9 +253,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (!(event.target instanceof Element)) return;
 
         // Ignore clicks inside elements with class "profile-logout"
-        if (event.target.closest('.profile-logout a')) {
-            return; // Do nothing
-        }
+        // if (event.target.closest('.profile-logout a')) {
+        //     return; // Do nothing
+        // }
 
         // Other click event logic here
     });
@@ -269,8 +269,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Express-flash message handles
-    processFlashAlert(document.querySelector('.alert-success'));
-    processFlashAlert(document.querySelector('.alert-danger'));
+    // processFlashAlert(document.querySelector('.alert-success'));
+    // processFlashAlert(document.querySelector('.alert-danger'));
 
     // Event listener to all bookmark buttons - Event Delegation
     document.addEventListener('click', async (event) => {

@@ -87,6 +87,14 @@ a.disabled {
     }
 }
 
+#success-alert {
+    display: none;
+}
+
+#error-alert {
+    display: none;
+}
+
 /* Alert Container */
 .alert-container {
     position: fixed;
@@ -97,6 +105,7 @@ a.disabled {
     width: 90%;
     max-width: 400px;
     text-align: center;
+    border-radius: 5px;
 }
 
 .alert-container .alert {
@@ -105,7 +114,6 @@ a.disabled {
     font-size: 1rem;
     text-align: center;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-    border-radius: 5px;
     animation: fadeIn 0.5s ease; /* Fade-in animation */
     transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out;
 }

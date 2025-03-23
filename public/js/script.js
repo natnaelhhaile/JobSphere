@@ -42,13 +42,15 @@ function showFlashMessage(message, type) {
     const flashMessage = document.createElement("div");
     flashMessage.id = alertId;
     flashMessage.dataset.source = "client";
-    flashMessage.classList.add("alert", `alert-${type === "error" ? "danger" : "success"}`, "alert-dismissible", "fade", "show");
+    flashMessage.classList.add("alert", `alert-${type === "danger" ? "danger" : "success"}`, "alert-dismissible", "fade", "show");
     flashMessage.setAttribute("role", "alert");
 
     flashMessage.innerHTML = `
         ${message}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    `;
+        `;
+        
+        // <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    flashMessage.style.display = "block";
 
     alertContainer.appendChild(flashMessage);
 
@@ -56,7 +58,7 @@ function showFlashMessage(message, type) {
         flashMessage.classList.add("fade-out");
 
         flashMessage.addEventListener('animationend', () => {
-            this.remove();
+            flashMessage.remove();
         }, { once: true })
     }, 4000);
 }
@@ -67,19 +69,16 @@ function showFlashMessage(message, type) {
 // Function to process flash alerts
 function processFlashAlert(alertElement) {
     if (!alertElement || !alertElement.textContent.trim()) {
-        if (alertElement) {
-            alertElement.style.display = 'none';
-            alertElement.classList.remove('fade-out'); // remove .fade-out if it exists
-            return;
-        }
+        return;
     }
+    
     alertElement.style.display = 'block';
 
     // Close button functionality
-    const closeButton = alertElement.querySelector('.btn-close');
-    closeButton.addEventListener('click', () => {
-        alertElement.style.display = 'none'; // Close the alert manually
-    });
+    // const closeButton = alertElement.querySelector('.btn-close');
+    // closeButton.addEventListener('click', () => {
+    //     alertElement.style.display = 'none'; // Close the alert manually
+    // });
 
     fadeOutAlert(alertElement);
 }
@@ -102,7 +101,15 @@ function fadeOutAlert(alertElement) {
 document.addEventListener('DOMContentLoaded', async () => {
 
     // Express-flash message handles
-    processFlashAlert(document.getElementById('success-alert'));
-    processFlashAlert(document.getElementById('error-alert'));
+    const successAlert = document.getElementById('success-alert');
+    const errorAlert = document.getElementById('error-alert');
+
+    if (successAlert && successAlert.textContent.trim() !== '') {
+        processFlashAlert(successAlert);
+    }
+
+    if (errorAlert && errorAlert.textContent.trim() !== '') {
+        processFlashAlert(errorAlert);
+    }
 
 });
