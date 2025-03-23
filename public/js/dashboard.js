@@ -198,27 +198,6 @@ async function fetchJobs(filter = 'all', page = 1) {
     }
 }
 
-// Function to process flash alerts
-function processFlashAlert(alertElement) {
-    if (!alertElement || !alertElement.textContent.trim()) {
-        if (alertElement) alertElement.style.display = 'none';
-        return;
-    }
-    alertElement.style.display = 'block';
-    fadeOutAlert(alertElement);
-}
-
-// Function to handle fade-out and removal of alert
-function fadeOutAlert(alertElement) {
-    if (!alertElement) return;
-
-    alertElement.classList.add('fade-out'); // Start the animation
-
-    alertElement.addEventListener('animationend', () => {
-        alertElement.style.display = 'none';
-    }, { once: true }); // Ensures it runs only once
-}
-
 // Toggle bookmark helper function
 async function toggleBookmark(jobId, button) {
     try {
