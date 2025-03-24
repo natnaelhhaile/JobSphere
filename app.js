@@ -1,4 +1,5 @@
 const express = require('express');
+const bodyParser = require("body-parser");
 const mongoose = require('mongoose');
 const path = require('path');
 const cookieParser = require('cookie-parser');
@@ -18,8 +19,8 @@ const { bookmarkRoutes } = require('./routes/bookmarkRoutes');
 
 // Middleware setup
 app.use(cookieParser());
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 
 // Passport middleware
 app.use(passport.initialize());

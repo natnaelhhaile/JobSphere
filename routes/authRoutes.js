@@ -41,9 +41,10 @@ router.post('/signup', [
       return res.redirect("/auth/signup");
     }
     const { username, email, password } = req.body;
+    console.log(username, email, password)
     const usernameLowerCase = username.toLowerCase();
     try {
-      if (await User.findOne({ usernameLowerCase })) {
+      if (await User.findOne({ username: usernameLowerCase })) {
         req.flash('error_msg', 'Username is taken.');
         return res.redirect("/auth/signup");
       }
@@ -52,7 +53,7 @@ router.post('/signup', [
         return res.redirect("/auth/signup");
       }
       const hashedPassword = await bcrypt.hash(password, 10);
-      const user = new User({ usernameLowerCase, email, password: hashedPassword });
+      const user = new User({ username: usernameLowerCase, email, password: hashedPassword });
       const token = generateVerificationToken(email);
       await sendVerificationEmail(email, token);
       await user.save();
@@ -83,7 +84,11 @@ router.post('/login', async (req, res) => {
       req.flash('error_msg', 'Invalid credentials!');
       return res.redirect("/auth/login");
     }
-    const token = jwt.sign({ userId: user._id }, config.JWT_SECRET, { expiresIn: '1h' });
+    // if (!user.emailVerified) {
+    //   req.flash('error_msg', 'Please verify your email to gain access to your account!');
+    //   return res.redirect("/auth/login");
+    // }
+    const token = jwt.sign({ userId: user._id }, config.JWT_SECRET, { expiresIn: '2h' });
     res.cookie('token', token, {
       httpOnly: true,
       secure: config.NODE_ENV === 'production',

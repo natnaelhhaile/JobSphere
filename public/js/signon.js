@@ -1,28 +1,44 @@
 document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById("signupForm").addEventListener("submit", async function (event) {
-        event.preventDefault(); // Prevent form submission
+    const signupForm = document.getElementById("signupForm");
+    if (signupForm) {
+        signupForm.addEventListener("submit", async function (event) {
+            event.preventDefault(); // Prevent form submission
+    
+            const usernameInput = document.getElementById("username");
+            const emailInput = document.getElementById("email");
+            const passwordInput = document.getElementById("password");
+            const username = usernameInput.value.trim();
+            const email = emailInput.value.trim();
+            const password = passwordInput.value.trim();
 
-        const emailInput = document.getElementById("email");
-        const passwordInput = document.getElementById("password");
-        const email = emailInput.value.trim();
-        const password = passwordInput.value.trim();
-
-        // Email validation
-        if (!validator.isEmail(email)) {
-            showFlashMessage("Invalid email address. Please enter a valid one.", "danger");
-            return;
-        }
-
-        // Password validation (6 min-characters, 1 uppercase, 1 number, 1 special character)
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/;
-        if (!passwordRegex.test(password)) {
-            showFlashMessage("Password must be at least 6 characters long and include 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.", "danger");
-            return;
-        }
-
-        showFlashMessage("All inputs are valid! Submitting...", "success");
-        this.submit();
-    });
+            // Username validation
+            if (!username) {
+                showFlashMessage("Username is required. Please enter a username.", "danger");
+                return;
+            }
+    
+            if (username.includes(" ")) {
+                showFlashMessage("Username cannot contain spaces.", "danger");
+                return;
+            }
+    
+            // Email validation
+            if (!validator.isEmail(email)) {
+                showFlashMessage("Invalid email address. Please enter a valid one.", "danger");
+                return;
+            }
+    
+            // Password validation (6 min-characters, 1 uppercase, 1 number, 1 special character)
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{6,}$/;
+            if (!passwordRegex.test(password)) {
+                showFlashMessage("Password must be at least 6 characters long and include 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character.", "danger");
+                return;
+            }
+    
+            showFlashMessage("All inputs are valid! Submitting...", "success");
+            this.submit();
+        });
+    }
 
     document.getElementById("togglePassword").addEventListener("click", function () {
         const passwordInput = document.getElementById("password");

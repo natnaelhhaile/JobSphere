@@ -20,14 +20,14 @@
             <% if (success_msg) { %>
                 <div id="success-alert" class="alert alert-success alert-dismissible fade show" role="alert">
                     <%= success_msg %>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <!-- <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> -->
                 </div>
             <% } %>
         
             <% if (error_msg) { %>
-                <div id="danger-alert" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <div id="error-alert" class="alert alert-danger alert-dismissible fade show" role="alert">
                     <%= error_msg %>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    <!-- <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> -->
                 </div>
             <% } %>
         </div>
@@ -68,8 +68,8 @@
     <%- include('partials/footer') %>
 
     <!-- Link to your external JS file -->
-    <script src="/js/bookmarks.js"></script>
     <script src="/js/script.js"></script>
+    <script src="/js/bookmarks.js"></script>
 
 </body>
 </html>

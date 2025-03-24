@@ -1,5 +1,5 @@
-let flashMessageQueue = []; // Queue to store flash messages
-let isDisplaying = false; // Flag to check if a flash message is currently displayed
+// let flashMessageQueue = []; // Queue to store flash messages
+// let isDisplaying = false; // Flag to check if a flash message is currently displayed
 
 const deleteAccountModal = document.getElementById('deleteAccountModal'); // Delete account modal
 const proceedToPasswordButton = document.getElementById('proceedToPassword'); // "Yes, Proceed" button
@@ -37,41 +37,41 @@ function disableResendLink(seconds) {
 }
 
 // Function to display flash/pop-up messages in queues
-const showFlashMessage = (type, message) => {
-    const flashContainer = document.getElementById('flash-messages');
-    if (!flashContainer) {
-        console.error('Flash message container not found.');
-        return;
-    }
+// const showFlashMessage = (type, message) => {
+//     const flashContainer = document.getElementById('flash-messages');
+//     if (!flashContainer) {
+//         console.error('Flash message container not found.');
+//         return;
+//     }
 
-    flashMessageQueue.push({ type, message });
+//     flashMessageQueue.push({ type, message });
 
-    const displayNextMessage = () => {
-        if (isDisplaying || flashMessageQueue.length === 0) {
-            return;
-        }
-        const { type, message } = flashMessageQueue.shift();
-        isDisplaying = true;
+//     const displayNextMessage = () => {
+//         if (isDisplaying || flashMessageQueue.length === 0) {
+//             return;
+//         }
+//         const { type, message } = flashMessageQueue.shift();
+//         isDisplaying = true;
 
-        flashContainer.innerHTML = `
-            <div class="alert-container">
-                <div id="${type}-alert" class="alert alert-${type} alert-dismissible fade show" role="alert">
-                    ${message}
-                </div>
-            </div>
-        `;
+//         flashContainer.innerHTML = `
+//             <div class="alert-container">
+//                 <div id="${type}-alert" class="alert alert-${type} alert-dismissible fade show" role="alert">
+//                     ${message}
+//                 </div>
+//             </div>
+//         `;
 
-        setTimeout(() => {
-            flashContainer.innerHTML = ''; // Clear the flash message
-            isDisplaying = false; // Reset the flag
-            displayNextMessage(); // Display the next message in the queue
-        }, 5000); // Display for 5 seconds before fading out
-    }
-    // Start displaying the flash messages if not already displaying
-    if (!isDisplaying) {
-        displayNextMessage();
-    }
-}
+//         setTimeout(() => {
+//             flashContainer.innerHTML = ''; // Clear the flash message
+//             isDisplaying = false; // Reset the flag
+//             displayNextMessage(); // Display the next message in the queue
+//         }, 5000); // Display for 5 seconds before fading out
+//     }
+//     // Start displaying the flash messages if not already displaying
+//     if (!isDisplaying) {
+//         displayNextMessage();
+//     }
+// }
 
 // Function to handle form resubmission by making fetch api requests
 const handleFormSubmission = async (endpoint, method, formData, options = {}) => {
@@ -105,10 +105,12 @@ const handleFormSubmission = async (endpoint, method, formData, options = {}) =>
             throw new Error(data.message || "Something went wrong.");
         }
 
+        // if (modalId) bootstrap.Modal.getInstance(document.getElementById(modalId))?.hide();
+
         if (Array.isArray(data)) {
-            data.forEach(({ type, message }) => showFlashMessage(type, message));
+            data.forEach(({ message, type }) => showFlashMessage(message, type));
         } else {
-            showFlashMessage(data.type, data.message);
+            showFlashMessage(data.message, data.type);
         }
 
         if (data.username) {
@@ -124,10 +126,12 @@ const handleFormSubmission = async (endpoint, method, formData, options = {}) =>
         // Redirect if needed
         if (options.redirectAfter) {
             window.location.href = options.redirectAfter;
+        } else {
+            showFlashMessage(data.message || "Operation successful.", data.type || "success");
         }
     } catch (err) {
         console.error(`Error submitting to ${endpoint}:`, err);
-        showFlashMessage('danger', err.message || 'An unexpected error occurred. Please try again.');
+        showFlashMessage(err.message || 'Something went wrong. Please try again later.', 'danger');
     } finally {
         loadingOverlay.style.display = 'none';
     }
@@ -160,7 +164,7 @@ const formsConfig = [
     { formId: 'changePasswordForm', modalId: 'changePasswordModal', endpoint: '/profile/password', method: 'PATCH', fields: ['currentPassword', 'newPassword'], redirectAfter: false },
     { formId: 'addEmailForm', modalId: 'addEmailModal', endpoint: '/profile/email', method: 'PATCH', fields: ['email'], redirectAfter: false },
     { formId: 'addPhoneForm', modalId: 'addPhoneModal', endpoint: '/profile/phone', method: 'PATCH', fields: ['phone'], redirectAfter: false },
-    { formId: 'deleteAccountForm', modalId: 'deleteAccountModal', endpoint: '/profile/DELETE', method: 'DELETE', fields: ['password'], redirectAfter: '/' },
+    { formId: 'deleteAccountStep2', modalId: 'deleteAccountModal', endpoint: '/profile/delete', method: 'POST', fields: ['password'], redirectAfter: '/' },
     { formId: 'uploadResumeForm', modalId: 'uploadResumeModal', endpoint: '/resume/upload', method: 'POST', isFileUpload: true, redirectAfter: false },
 ];
 
@@ -170,7 +174,7 @@ document.addEventListener('DOMContentLoaded', () => {
     resendOTPLink.addEventListener('click', async (e) => {
         e.preventDefault();
         if (resendCooldown) {
-            showFlashMessage('danger', 'Please wait before requesting another OTP.');
+            showFlashMessage('Please wait before requesting another OTP.', 'danger');
             return;
         }
         const phoneNumber = document.getElementById('phone').value;
@@ -184,7 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 body: JSON.stringify({ phoneNumber })
             });
             const data = await response.json();
-            showFlashMessage(data.type, data.message);
+            showFlashMessage(data.message, data.type);
             if (response.ok) {
                 otpInfo.textContent = 'OTP sent successfully. Please check your phone.';
                 otpInfo.style.color = 'green';
@@ -195,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (err) {
             console.error('Error resending OTP:', err);
-            showFlashMessage('danger', 'An unexpected error occurred! Please try again.');
+            showFlashMessage('Something went wrong. Please try again.', 'danger');
         }
     });
 
@@ -215,14 +219,14 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             const data = await response.json();
-            showFlashMessage(data.type, data.message);
+            showFlashMessage(data.message, data.type);
             // if (response.ok) {
             //     addPhoneForm.classList.add('d-none');
             //     verifyPhoneForm.classList.remove('d-none');
             // }
         } catch (err) {
             console.error('Error verifying phone number:', err);
-            showFlashMessage('danger', 'An unexpected error occurred! Please try again.');
+            showFlashMessage('Something went wrong. Please try again.', 'danger');
         }
     });
 

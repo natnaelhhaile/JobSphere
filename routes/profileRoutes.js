@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const validator = require('validator');
 const config = require('../config/configEnv'); // Centralized configuration
 const { authMiddleware } = require('../utils/authUtils');
 const { generateVerificationToken, sendVerificationEmail, sendOTPToPhone } = require('../utils/verificationUtils');
@@ -142,6 +143,13 @@ router.patch('/password', authMiddleware, async (req, res) => {
 // Route to add secondary email
 router.patch('/email', authMiddleware, async (req, res) => {
     const { email } = req.body;
+
+    if (!validator.isEmail(email)) {
+        return res.status(400).json({
+            type: 'danger',
+            message: 'Invalid email format! Please enter a valid email address.',
+        });
+    }
     
     try {
         // Validate userId
@@ -214,7 +222,7 @@ router.patch('/phone', authMiddleware, async (req, res) => {
 });
 
 // Route to delete account
-router.delete('/DELETE', authMiddleware, async (req, res) => {
+router.post('/delete', authMiddleware, async (req, res) => {
     const { password } = req.body;
     
     try {
@@ -222,7 +230,7 @@ router.delete('/DELETE', authMiddleware, async (req, res) => {
         if (!mongoose.isValidObjectId(req.userId)) {
             return res.status(400).json({ 
                 type: 'danger', 
-                message: "Invalid user ID" 
+                message: "Invalid user ID!" 
             });
         }
         const userId = new mongoose.Types.ObjectId(req.userId);
@@ -230,28 +238,25 @@ router.delete('/DELETE', authMiddleware, async (req, res) => {
         if (!user || !(await bcrypt.compare(password, user.password))) {
             return res.status(400).json({
                 type: 'danger',
-                message: 'Incorrect password! Account deletion failed!',
+                message: 'Incorrect password!',
             });
         }
-
         await User.findByIdAndDelete(userId);
         await Job.deleteMany({ user: userId });
         res.clearCookie('token', {
             httpOnly: true,
             secure: config.NODE_ENV === 'production',
             sameSite: 'strict',
-            maxAge: 3600000,
         });
-
-        return res.status(200).json({ 
-            type: 'success', 
-            message: 'Account deleted successfully!' 
+        return res.status(200).json({
+            type: 'success',
+            message: 'Account deleted successfully!'
         });
     } catch (err) {
         console.error('Error deleting account:', err);
         return res.status(500).json({
             type: 'danger',
-            message: 'Error deleting account. Please try again.',
+            message: 'Something went wrong. Please try again later.',
         });
     }
 });

@@ -6,6 +6,7 @@ const User = require('../models/User');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const FacebookStrategy = require('passport-facebook').Strategy;
 
+// Function to generate unique usernames for users that register via social logins
 async function getUniqueUsername(baseUsername) {
     let sanitizedUsername = baseUsername.replace(/\s+/g, '').toLowerCase();
     let uniqueUsername = sanitizedUsername;

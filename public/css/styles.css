@@ -101,7 +101,7 @@ a.disabled {
     top: 10px; /* Position at the top of the page */
     left: 50%;
     transform: translateX(-50%);
-    z-index: 1000;
+    z-index: 100000;
     width: 90%;
     max-width: 400px;
     text-align: center;
