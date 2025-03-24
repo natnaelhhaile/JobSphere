@@ -43,8 +43,8 @@
 
 <p align="center"><strong>Social Login & Sign-Up Pages</strong></p>
 <p align="center">
-  <img width="1267" alt="Signup Page" src="https://github.com/user-attachments/assets/fd6ccc2b-0833-48d2-832f-436b00cc9f3f" />
-  <img width="1113" alt="Login Page" src="https://github.com/user-attachments/assets/c4c59b8d-0fa4-468f-ac13-c3f152942941" />
+  <img width="1424" alt="image" src="https://github.com/user-attachments/assets/4cb49596-bc27-41cd-a4f7-39040cb17f4a" />
+  <img width="1452" alt="Login Page" src="https://github.com/user-attachments/assets/d516d6ee-108d-40fa-a2de-a8fdba7c2339" />
 </p>
 
 <p align="center"><strong>Dashboard with Job Recommendations</strong></p>
