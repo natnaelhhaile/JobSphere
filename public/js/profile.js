@@ -1,6 +1,3 @@
-// let flashMessageQueue = []; // Queue to store flash messages
-// let isDisplaying = false; // Flag to check if a flash message is currently displayed
-
 const deleteAccountModal = document.getElementById('deleteAccountModal'); // Delete account modal
 const proceedToPasswordButton = document.getElementById('proceedToPassword'); // "Yes, Proceed" button
 const deleteAccountStep1 = document.getElementById('deleteAccountStep1'); // Step 1 form
@@ -36,43 +33,6 @@ function disableResendLink(seconds) {
     }, 1000);
 }
 
-// Function to display flash/pop-up messages in queues
-// const showFlashMessage = (type, message) => {
-//     const flashContainer = document.getElementById('flash-messages');
-//     if (!flashContainer) {
-//         console.error('Flash message container not found.');
-//         return;
-//     }
-
-//     flashMessageQueue.push({ type, message });
-
-//     const displayNextMessage = () => {
-//         if (isDisplaying || flashMessageQueue.length === 0) {
-//             return;
-//         }
-//         const { type, message } = flashMessageQueue.shift();
-//         isDisplaying = true;
-
-//         flashContainer.innerHTML = `
-//             <div class="alert-container">
-//                 <div id="${type}-alert" class="alert alert-${type} alert-dismissible fade show" role="alert">
-//                     ${message}
-//                 </div>
-//             </div>
-//         `;
-
-//         setTimeout(() => {
-//             flashContainer.innerHTML = ''; // Clear the flash message
-//             isDisplaying = false; // Reset the flag
-//             displayNextMessage(); // Display the next message in the queue
-//         }, 5000); // Display for 5 seconds before fading out
-//     }
-//     // Start displaying the flash messages if not already displaying
-//     if (!isDisplaying) {
-//         displayNextMessage();
-//     }
-// }
-
 // Function to handle form resubmission by making fetch api requests
 const handleFormSubmission = async (endpoint, method, formData, options = {}) => {
     const loadingOverlay = document.getElementById('loading-overlay');
@@ -105,11 +65,24 @@ const handleFormSubmission = async (endpoint, method, formData, options = {}) =>
             throw new Error(data.message || "Something went wrong.");
         }
 
-        // if (modalId) bootstrap.Modal.getInstance(document.getElementById(modalId))?.hide();
+        // 1. Prioritize Redirection
+        if (options.redirectAfter) {
+            sessionStorage.setItem("flashMessage", JSON.stringify({
+                message: data.message,
+                type: data.type,
+            }));
+            window.location.href = options.redirectAfter;
+            return; // EXIT IMMEDIATELY - do not show local flash messages
+        }
 
-        if (Array.isArray(data)) {
-            data.forEach(({ message, type }) => showFlashMessage(message, type));
-        } else {
+        // 2. Handle AJAX messages (if not redirecting)
+        // Clear existing alerts first to prevent stacking
+        const alertContainer = document.querySelector('.alert-container');
+        if (alertContainer) alertContainer.innerHTML = ''; 
+
+        if (Array.isArray(data.messages)) {
+            data.messages.forEach(({ message, type }) => showFlashMessage(message, type));
+        } else if (data.message) {
             showFlashMessage(data.message, data.type);
         }
 
@@ -124,11 +97,15 @@ const handleFormSubmission = async (endpoint, method, formData, options = {}) =>
         }
 
         // Redirect if needed
-        if (options.redirectAfter) {
-            window.location.href = options.redirectAfter;
-        } else {
-            showFlashMessage(data.message || "Operation successful.", data.type || "success");
-        }
+        // if (options.redirectAfter) {
+        //     sessionStorage.setItem("flashMessage", JSON.stringify({
+        //         message: data.message,
+        //         type: data.type,
+        //     }))
+        //     window.location.href = options.redirectAfter;
+        // } else if (data.message && data.type) {
+        //     showFlashMessage(data.message, data.type);
+        // }
     } catch (err) {
         console.error(`Error submitting to ${endpoint}:`, err);
         showFlashMessage(err.message || 'Something went wrong. Please try again later.', 'danger');
@@ -165,7 +142,7 @@ const formsConfig = [
     { formId: 'addEmailForm', modalId: 'addEmailModal', endpoint: '/profile/email', method: 'PATCH', fields: ['email'], redirectAfter: false },
     { formId: 'addPhoneForm', modalId: 'addPhoneModal', endpoint: '/profile/phone', method: 'PATCH', fields: ['phone'], redirectAfter: false },
     { formId: 'deleteAccountStep2', modalId: 'deleteAccountModal', endpoint: '/profile/delete', method: 'POST', fields: ['password'], redirectAfter: '/' },
-    { formId: 'uploadResumeForm', modalId: 'uploadResumeModal', endpoint: '/resume/upload', method: 'POST', isFileUpload: true, redirectAfter: false },
+    { formId: 'uploadResumeForm', modalId: 'uploadResumeModal', endpoint: '/resume/upload', method: 'POST', isFileUpload: true, redirectAfter: '/dashboard' },
 ];
 
 

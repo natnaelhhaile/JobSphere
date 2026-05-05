@@ -97,7 +97,7 @@ function renderJobs(filter, jobs, currentPage, totalJobs, savedJobs, jobCounts, 
             if (window.innerWidth < 768) {
                 document.querySelector('.job-filter.btn-group').style.display = 'none';
             } else {
-                document.querySelector('.job-filter.btn-group').style.display = 'flex';
+                document.querySelector('.job-filter.btn-group').style.display = 'none';
             }
             return;
         } else if (jobCountsSum > 0) {

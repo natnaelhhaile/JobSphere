@@ -181,7 +181,7 @@ router.patch('/email', authMiddleware, async (req, res) => {
         user.secondaryEmail = email;
         await user.save();
         const token = generateVerificationToken(email);
-        await sendVerificationEmail(email, token);
+        await sendVerificationEmail(email, token, false);
 
         return res.status(200).json([
             { 

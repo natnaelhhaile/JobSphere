@@ -358,6 +358,10 @@ footer {
     display: none;
 }
 
+#no-user-jobs-msg {
+    margin: 140px 0!important;
+}
+
 .no-jobs-message a {
     color: #007bff;
     text-decoration: none;

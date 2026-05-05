@@ -29,11 +29,14 @@ function showFlashMessage(message, type) {
         document.body.prepend(alertContainer);
     }
 
+    // Clear the container to remove duplicates or old messages
+    alertContainer.innerHTML = '';
+
     // Define Id based on message type
-    const alertId = type === "error" ? "error-alert" : "success-alert";
+    const alertId = type === "danger" || type === "error" ? "error-alert" : "success-alert";
 
     // Check if a JS-generated alert already exists and remove it 
-    // -- this is done not to remove server generated alerts
+    // this is done not to remove server generated alerts
     const existingAlert = document.getElementById(alertId);
     if (existingAlert && existingAlert.dataset.source === "client" ) {
         existingAlert.remove();
@@ -42,14 +45,10 @@ function showFlashMessage(message, type) {
     const flashMessage = document.createElement("div");
     flashMessage.id = alertId;
     flashMessage.dataset.source = "client";
-    flashMessage.classList.add("alert", `alert-${type === "danger" ? "danger" : "success"}`, "alert-dismissible", "fade", "show");
+    flashMessage.classList.add("alert", `alert-${type === "danger" || type === "error" ? "danger" : "success"}`, "alert-dismissible", "fade", "show");
     flashMessage.setAttribute("role", "alert");
 
-    flashMessage.innerHTML = `
-        ${message}
-        `;
-        
-        // <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    flashMessage.innerHTML = `${message}`;
     flashMessage.style.display = "block";
 
     alertContainer.appendChild(flashMessage);
@@ -74,12 +73,6 @@ function processFlashAlert(alertElement) {
     
     alertElement.style.display = 'block';
 
-    // Close button functionality
-    // const closeButton = alertElement.querySelector('.btn-close');
-    // closeButton.addEventListener('click', () => {
-    //     alertElement.style.display = 'none'; // Close the alert manually
-    // });
-
     fadeOutAlert(alertElement);
 }
 
@@ -100,10 +93,19 @@ function fadeOutAlert(alertElement) {
 // Initialize page
 document.addEventListener('DOMContentLoaded', async () => {
 
-    // Express-flash message handles
+    // 1. Check for messages stored in sessionStorage from a previous redirect
+    const storedMessage = sessionStorage.getItem("flashMessage");
+    if (storedMessage) {
+        const { message, type } = JSON.parse(storedMessage);
+        showFlashMessage(message, type);
+        sessionStorage.removeItem("flashMessage"); // Clear it immediately!
+    }
+
+    // 2. Handle standard Express-flash alerts (from EJS)
     const successAlert = document.getElementById('success-alert');
     const errorAlert = document.getElementById('error-alert');
 
+    // Only process if they weren't already cleared by showFlashMessage()
     if (successAlert && successAlert.textContent.trim() !== '') {
         processFlashAlert(successAlert);
     }

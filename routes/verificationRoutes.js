@@ -95,8 +95,8 @@ router.get('/email', async (req, res) => {
         const user = await User.findOne({ $or: [{ email: decoded.email }, { secondaryEmail: decoded.email }] });
 
         if (!user) {
-            req.flash('error_msg', 'Email verification failed!');
-            return res.redirect('/login');
+            req.flash('error_msg', 'Email verification failed! User not found.');
+            return res.redirect('/auth/login');
         }
 
         if (user.email === decoded.email) {
@@ -109,7 +109,7 @@ router.get('/email', async (req, res) => {
     } catch (err) {
         console.error('Error verifying email:', err);
         req.flash('error_msg', 'Email verification failed!');
-        return res.redirect('/login');
+        return res.redirect('/auth/login');
     }
 });
 

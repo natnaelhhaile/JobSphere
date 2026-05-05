@@ -55,9 +55,9 @@ router.post('/signup', [
       const hashedPassword = await bcrypt.hash(password, 10);
       const user = new User({ username: usernameLowerCase, email, password: hashedPassword });
       const token = generateVerificationToken(email);
-      await sendVerificationEmail(email, token);
+      await sendVerificationEmail(email, token, true);
       await user.save();
-      req.flash('success_msg', 'Registration successful! You can now log in.');
+      req.flash('success_msg', 'Registration successful! Please verify your email to log in.');
       res.redirect('/auth/login');
     } catch (err) {
       console.error('Error during registration:', err);
@@ -84,10 +84,10 @@ router.post('/login', async (req, res) => {
       req.flash('error_msg', 'Invalid credentials!');
       return res.redirect("/auth/login");
     }
-    // if (!user.emailVerified) {
-    //   req.flash('error_msg', 'Please verify your email to gain access to your account!');
-    //   return res.redirect("/auth/login");
-    // }
+    if (!user.emailVerified) {
+      req.flash('error_msg', 'Please verify your email to gain access to your account!');
+      return res.redirect("/auth/login");
+    }
     const token = jwt.sign({ userId: user._id }, config.JWT_SECRET, { expiresIn: '2h' });
     res.cookie('token', token, {
       httpOnly: true,
